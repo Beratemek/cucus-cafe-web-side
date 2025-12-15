@@ -50,7 +50,6 @@ export function AdminLoginPage({ onLogin, onBack }: AdminLoginPageProps) {
             sessionStorage.setItem('token', data.token);
           }
           
-          alert(`Hoşgeldiniz Şef ${data.user.name}!`);
           onLogin(); 
         } else {
           alert("Giriş başarılı ancak bu panele erişim yetkiniz (Admin) yok!");
