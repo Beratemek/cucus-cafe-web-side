@@ -208,12 +208,15 @@ exports.forgotPassword = async (req, res) => {
         html: message
       });
 
+      console.log('✓ Password reset email sent to:', u.email);
       res.status(200).json({ message: "Şifre sıfırlama linki email adresinize gönderildi." });
     } catch (err) {
+      console.error('❌ Failed to send password reset email:', err.message);
+      console.error('❌ Error details:', err);
       u.resetPasswordToken = undefined;
       u.resetPasswordExpires = undefined;
       await u.save();
-      return res.status(500).json({ message: "Email gönderilemedi." });
+      return res.status(500).json({ message: "Email gönderilemedi. Lütfen daha sonra tekrar deneyin." });
     }
 
   } catch (error) {
