@@ -72,6 +72,7 @@ interface Campaign {
   startDate: string;
   endDate: string;
   isActive: boolean;
+  couponCode?: string; // Optional campaign coupon code
 }
 
 // İKON LİSTESİ
@@ -125,6 +126,7 @@ export function AdminDashboard({ onLogout, onNavigateHome }: AdminDashboardProps
   const [newCampStartDate, setNewCampStartDate] = useState('');
   const [newCampEndDate, setNewCampEndDate] = useState('');
   const [newCampActive, setNewCampActive] = useState(true);
+  const [newCampCoupon, setNewCampCoupon] = useState(''); // Campaign coupon code
 
   // Kategori Yönetim State'leri
   const [showCategoryModal, setShowCategoryModal] = useState(false); 
@@ -412,9 +414,18 @@ export function AdminDashboard({ onLogout, onNavigateHome }: AdminDashboardProps
       const token = localStorage.getItem('token') || sessionStorage.getItem('token');
       const response = await fetch(`${API_URL}/campaigns`, {
         method: "POST", headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
-        body: JSON.stringify({ title: newCampTitle, description: newCampDesc, discountType: newCampType, discountValue: Number(newCampValue), startDate: newCampStartDate || new Date(), endDate: newCampEndDate, isActive: newCampActive })
+        body: JSON.stringify({ 
+          title: newCampTitle, 
+          description: newCampDesc, 
+          discountType: newCampType, 
+          discountValue: Number(newCampValue), 
+          startDate: newCampStartDate || new Date(), 
+          endDate: newCampEndDate, 
+          isActive: newCampActive,
+          couponCode: newCampCoupon || undefined // Optional coupon
+        })
       });
-      if (response.ok) { alert("Kampanya oluşturuldu!"); setShowCampaignModal(false); fetchCampaigns(); setNewCampTitle(''); setNewCampDesc(''); setNewCampValue(0); setNewCampEndDate(''); }
+      if (response.ok) { alert("Kampanya oluşturuldu!"); setShowCampaignModal(false); fetchCampaigns(); setNewCampTitle(''); setNewCampDesc(''); setNewCampValue(0); setNewCampEndDate(''); setNewCampCoupon(''); }
     } catch (error) { console.error(error); }
   };
 
@@ -787,6 +798,7 @@ export function AdminDashboard({ onLogout, onNavigateHome }: AdminDashboardProps
               <div><label className="block text-sm text-[#8B5E3C] mb-2">İndirim Tipi</label><select value={newCampType} onChange={(e) => setNewCampType(e.target.value as 'percent' | 'amount')} className="w-full px-4 py-2 rounded-xl border border-[#C8A27A] text-[#2D1B12]"><option value="percent">Yüzde İndirim (%)</option><option value="amount">Sabit Tutar (₺)</option></select></div>
               <div><label className="block text-sm text-[#8B5E3C] mb-2">İndirim Değeri</label><Input type="number" value={newCampValue} onChange={(e) => setNewCampValue(Number(e.target.value))} placeholder="Örn: 20" className="rounded-xl border-[#C8A27A]" /></div>
               <div className="grid grid-cols-2 gap-4"><div><label className="block text-sm text-[#8B5E3C] mb-2">Başlangıç Tarihi</label><Input type="date" value={newCampStartDate} onChange={(e) => setNewCampStartDate(e.target.value)} className="rounded-xl border-[#C8A27A]" /></div><div><label className="block text-sm text-[#8B5E3C] mb-2">Bitiş Tarihi</label><Input type="date" value={newCampEndDate} onChange={(e) => setNewCampEndDate(e.target.value)} className="rounded-xl border-[#C8A27A]" /></div></div>
+              <div><label className="block text-sm text-[#8B5E3C] mb-2">Kupon Kodu (Opsiyonel)</label><Input value={newCampCoupon} onChange={(e) => setNewCampCoupon(e.target.value.toUpperCase())} placeholder="Örn: NEWYEAR veya boş bırakın" className="rounded-xl border-[#C8A27A]" maxLength={10} /><p className="text-xs text-gray-400 mt-1">Boş bırakırsanız otomatik oluşturulur</p></div>
               <div><label className="flex items-center gap-2 text-sm text-[#8B5E3C]"><input type="checkbox" checked={newCampActive} onChange={(e) => setNewCampActive(e.target.checked)} className="rounded border-[#C8A27A]" />Kampanyayı aktif olarak başlat</label></div>
               <div className="flex gap-3 pt-4"><Button onClick={handleCreateCampaign} className="flex-1 bg-gradient-to-r from-[#8B5E3C] to-[#8B5E3C] text-white hover:from-[#2D1B12] hover:to-[#2D1B12] rounded-xl">Kampanyayı Ekle</Button><Button onClick={() => setShowCampaignModal(false)} variant="outline" className="flex-1 border-[#C8A27A] text-[#8B5E3C] hover:bg-[#E6D3BA] rounded-xl">İptal</Button></div>
             </div>

@@ -42,10 +42,9 @@ function getRandomPrize() {
     return wheelPrizes[0]; // Fallback
 }
 
-// Kupon kodu oluşturma
-function generateCouponCode(discountValue) {
-    const randomStr = Math.random().toString(36).substring(2, 8).toUpperCase();
-    return `WHEEL${discountValue}-${randomStr}`;
+// Kupon kodu oluşturma (6 karakter - kısa ve akılda kalıcı)
+function generateCouponCode() {
+    return Math.random().toString(36).substring(2, 8).toUpperCase();
 }
 
 // Çark çevirme
@@ -94,7 +93,7 @@ exports.spinWheel = async (req, res) => {
 
         } else if (prize.type === "coupon") {
             // Kupon oluştur
-            const couponCode = generateCouponCode(prize.value);
+            const couponCode = generateCouponCode();
             const expiryDate = new Date();
             expiryDate.setDate(expiryDate.getDate() + 30); // 30 gün geçerli
 

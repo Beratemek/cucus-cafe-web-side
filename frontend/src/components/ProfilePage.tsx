@@ -1,5 +1,6 @@
 import { motion } from 'motion/react';
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
@@ -26,6 +27,7 @@ interface Coupon {
 }
 
 export function ProfilePage({ initialTab = 'login' }: ProfilePageProps) {
+  const navigate = useNavigate();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   // Görünüm Modu: 'tabs' (Giriş/Kayıt), 'forgot' (Email Gir), 'reset' (Yeni Şifre)
@@ -186,7 +188,7 @@ export function ProfilePage({ initialTab = 'login' }: ProfilePageProps) {
     setIsLoggedIn(false);
     setUserInfo({ name: '', email: '', phone: '', points: 0, sadakat_no: '' });
     setAuthView('tabs');
-    window.location.reload();
+    navigate('/'); // Navigate to home instead of reload
   };
 
   // --- ŞİFRE UNUTTUM (ADIM 1) ---
