@@ -52,7 +52,7 @@ export function AdminLoginPage({ onLogin, onBack }: AdminLoginPageProps) {
           
           onLogin(); 
         } else {
-          alert("Giriş başarılı ancak bu panele erişim yetkiniz (Admin) yok!");
+          alert("Giriş başarılı ancak bu panele erişim yetkiniz yok!");
         }
       } else {
         alert(`Giriş Başarısız: ${data.message}`);

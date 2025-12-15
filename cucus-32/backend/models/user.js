@@ -71,7 +71,16 @@ const userSchema = new mongoose.Schema(
             reward: { type: String }, // "points", "coupon", "retry"
             rewardValue: { type: mongoose.Schema.Types.Mixed } // 10, 50 veya kupon objesi
          }
-        ]  
+        ],
+        
+        // Email Doğrulama
+        isVerified: { type: Boolean, default: false },
+        verificationToken: { type: String },
+        verificationTokenExpires: { type: Date },
+
+        // Şifre Sıfırlama
+        resetPasswordToken: { type: String },
+        resetPasswordExpires: { type: Date }
     },
     { timestamps: true }
 );

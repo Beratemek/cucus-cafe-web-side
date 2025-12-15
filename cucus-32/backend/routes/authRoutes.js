@@ -17,6 +17,10 @@ router.post("/logout", requireAuth, authController.logout);
 router.post("/forgot-password", authController.forgotPassword);
 
 // Şifre resetleme
+// Şifre resetleme
 router.post("/reset-password", authController.resetPassword);
+
+// Email doğrulama
+router.post("/verify-email", authController.verifyEmail);
 
 module.exports = router;

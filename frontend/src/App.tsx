@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Routes, Route, useNavigate, useLocation, Navigate } from 'react-router-dom';
 import { Navigation } from './components/Navigation';
 import { HomePage } from './components/HomePage';
 import { MenuPage } from './components/MenuPage';
@@ -7,14 +8,43 @@ import { ProfilePage } from './components/ProfilePage';
 import { ContactPage } from './components/ContactPage';
 import { AdminDashboard } from './components/AdminDashboard';
 import { AdminLoginPage } from './components/AdminLoginPage';
+import { ForgotPasswordPage } from './components/ForgotPasswordPage';
+import { ResetPasswordPage } from './components/ResetPasswordPage';
+import { VerifyEmailPage } from './components/VerifyEmailPage';
 import { API_URL } from './config';
 
+function MainLayout({ children }: { children: React.ReactNode }) {
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const getCurrentPage = () => {
+    const path = location.pathname;
+    if (path === '/') return 'home';
+    if (path.startsWith('/menu')) return 'menu';
+    if (path.startsWith('/campaigns')) return 'campaigns';
+    if (path.startsWith('/profile')) return 'profile';
+    if (path.startsWith('/contact')) return 'contact';
+    return 'home';
+  };
+
+  return (
+    <div className="min-h-screen">
+      <Navigation 
+        currentPage={getCurrentPage()} 
+        onNavigate={(page) => navigate(page === 'home' ? '/' : `/${page}`)}
+        onAdminClick={() => navigate('/admin')}
+      />
+      {children}
+    </div>
+  );
+}
+
 export default function App() {
-  const [currentPage, setCurrentPage] = useState<'home' | 'menu' | 'campaigns' | 'profile' | 'contact'>('home');
-  const [isAdminMode, setIsAdminMode] = useState(false);
   const [isAdminLoggedIn, setIsAdminLoggedIn] = useState(false);
-  const [profileInitialTab, setProfileInitialTab] = useState<'login' | 'register'>('login');
   const [isLoading, setIsLoading] = useState(true);
+  const [profileInitialTab, setProfileInitialTab] = useState<'login' | 'register'>('login');
+
+  const navigate = useNavigate();
 
   // --- Sayfa Yenilendiğinde Oturum Kontrolü ---
   useEffect(() => {
@@ -36,7 +66,6 @@ export default function App() {
         if (response.ok) {
           const data = await response.json();
           if (data.user.role === 'admin') {
-      
             setIsAdminLoggedIn(true);
           }
         }
@@ -51,71 +80,66 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    window.scrollTo(0, 0);
-  }, [currentPage, isAdminMode, isAdminLoggedIn]);
-
-  useEffect(() => {
     document.title = "CuCu's Coffee & Cake - Premium Coffee Experience";
-  }, []);
+    window.scrollTo(0, 0);
+  }, [isLoading]);
 
-  const handleNavigateToRegister = () => {
-    setProfileInitialTab('register');
-    setCurrentPage('profile');
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    sessionStorage.removeItem('token');
+    setIsAdminLoggedIn(false);
+    navigate('/');
   };
 
   if (isLoading) {
-    return <div className="min-h-screen flex items-center justify-center bg-[#FAF8F5]">
-      <div className="text-[#8B5E3C] animate-pulse">Yükleniyor...</div>
-    </div>;
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#FAF8F5]">
+        <div className="text-[#8B5E3C] animate-pulse">Yükleniyor...</div>
+      </div>
+    );
   }
 
-  // --- ADMIN MODU YÖNETİMİ ---
-  if (isAdminMode) {
-    if (isAdminLoggedIn) {
-      return <AdminDashboard 
-        // 1. ÇIKIŞ YAP (Tamamen siler ve atar)
-        onLogout={() => {
-          localStorage.removeItem('token');
-          sessionStorage.removeItem('token');
-          setIsAdminLoggedIn(false);
-          setIsAdminMode(false);
-          setCurrentPage('home');
-        }} 
-        
-        // 2. ANASAYFAYA DÖN (Oturumu SİLMEDEN sadece siteye döner)
-        onNavigateHome={() => {
-          setIsAdminMode(false); // Admin ekranını kapat
-          setCurrentPage('home'); // Ana sayfayı göster
-          // DİKKAT: setIsAdminLoggedIn(false) DEMİYORUZ! Oturum cepte kalıyor.
-        }}
-      />;
-    } else {
-      return <AdminLoginPage 
-        onLogin={() => setIsAdminLoggedIn(true)}
-        onBack={() => setIsAdminMode(false)}
-      />;
-    }
-  }
-
-  // --- NORMAL SİTE GÖRÜNÜMÜ ---
   return (
-    <div className="min-h-screen">
-      <Navigation 
-        currentPage={currentPage} 
-        onNavigate={setCurrentPage}
-        // Yönetici Paneline tıklandığında:
-        onAdminClick={() => {
-          setIsAdminMode(true);
-          // Eğer zaten giriş yapmışsa (token varsa) direkt dashboard açılacak
-          // App.tsx başındaki useEffect bunu zaten kontrol ediyor.
-        }}
-      />
+    <Routes>
+      <Route path="/" element={
+        <MainLayout>
+          <HomePage 
+            onNavigate={(page) => navigate(page === 'home' ? '/' : `/${page}`)} 
+            onNavigateToRegister={() => {
+              setProfileInitialTab('register');
+              navigate('/profile');
+            }} 
+          />
+        </MainLayout>
+      } />
       
-      {currentPage === 'home' && <HomePage onNavigate={setCurrentPage} onNavigateToRegister={handleNavigateToRegister} />}
-      {currentPage === 'menu' && <MenuPage />}
-      {currentPage === 'campaigns' && <CampaignsPage />}
-      {currentPage === 'profile' && <ProfilePage initialTab={profileInitialTab} />}
-      {currentPage === 'contact' && <ContactPage />}
-    </div>
+      <Route path="/menu" element={<MainLayout><MenuPage /></MainLayout>} />
+      <Route path="/campaigns" element={<MainLayout><CampaignsPage /></MainLayout>} />
+      <Route path="/profile" element={<MainLayout><ProfilePage initialTab={profileInitialTab} /></MainLayout>} />
+      <Route path="/contact" element={<MainLayout><ContactPage /></MainLayout>} />
+      
+      {/* Auth Routes */}
+      <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+      <Route path="/reset-password" element={<ResetPasswordPage />} />
+      <Route path="/verify-email" element={<VerifyEmailPage />} />
+
+      {/* Admin Route */}
+      <Route path="/admin" element={
+        isAdminLoggedIn ? (
+          <AdminDashboard 
+            onLogout={handleLogout} 
+            onNavigateHome={() => navigate('/')} 
+          />
+        ) : (
+          <AdminLoginPage 
+            onLogin={() => setIsAdminLoggedIn(true)} 
+            onBack={() => navigate('/')} 
+          />
+        )
+      } />
+
+      {/* Catch all - Redirect to Home */}
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
   );
 }
