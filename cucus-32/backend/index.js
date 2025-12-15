@@ -27,6 +27,11 @@ app.use("/api/orders", orderRoutes);
 app.use("/api/campaigns", campaignRoutes);
 app.use("/api/wheel", wheelRoutes);
 
+// Kök Dizin Mesajı (Render'da çalıştığını anlamak için)
+app.get('/', (req, res) => {
+  res.send('Ciao! CuCus Backend Service is Running ☕🍰');
+});
+
 const PORT = process.env.PORT || 4000;
 
 db().then(() => {
