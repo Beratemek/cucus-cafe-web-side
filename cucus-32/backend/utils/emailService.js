@@ -16,22 +16,23 @@ const sendEmail = async (options) => {
     console.log('📧 Using EMAIL_USER:', process.env.EMAIL_USER);
     console.log('📧 EMAIL_PASS configured:', process.env.EMAIL_PASS ? 'Yes ✓' : 'No ✗');
 
-    // IPv4 ZORLAMASI (family: 4) - Render/Gmail timeout sorununu çözer
+    // PORT 587 (STARTTLS) - En yüksek uyumluluk modu
     const transporter = nodemailer.createTransport({
-      service: 'gmail', // Tekrar standart servise dönüyoruz ama IPv4 ile
+      host: 'smtp.gmail.com',
+      port: 587,
+      secure: false, // 587 için false OLMALIDIR (STARTTLS kullanır)
       auth: {
         user: process.env.EMAIL_USER,
         pass: process.env.EMAIL_PASS,
       },
       tls: {
+        ciphers: 'SSLv3',
         rejectUnauthorized: false
       },
-      // KRİTİK AYARLAR:
-      family: 4, // Sadece IPv4 kullan (IPv6 timeout yapar)
-      logger: true, // Detaylı log
-      debug: true,  // Detaylı debug
-      connectionTimeout: 10000,
-      socketTimeout: 10000
+      debug: true,
+      logger: true,
+      connectionTimeout: 20000, // 20 saniye
+      socketTimeout: 20000 
     });
 
     // Verify transporter
