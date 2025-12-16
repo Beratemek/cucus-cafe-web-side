@@ -16,16 +16,22 @@ const sendEmail = async (options) => {
     console.log('📧 Using EMAIL_USER:', process.env.EMAIL_USER);
     console.log('📧 EMAIL_PASS configured:', process.env.EMAIL_PASS ? 'Yes ✓' : 'No ✗');
 
+    // IPv4 ZORLAMASI (family: 4) - Render/Gmail timeout sorununu çözer
     const transporter = nodemailer.createTransport({
-      host: 'smtp.gmail.com',
-      port: 465,
-      secure: true, // SSL kullan
+      service: 'gmail', // Tekrar standart servise dönüyoruz ama IPv4 ile
       auth: {
         user: process.env.EMAIL_USER,
         pass: process.env.EMAIL_PASS,
       },
-      connectionTimeout: 60000, // 60 saniye
-      socketTimeout: 60000, // 60 saniye
+      tls: {
+        rejectUnauthorized: false
+      },
+      // KRİTİK AYARLAR:
+      family: 4, // Sadece IPv4 kullan (IPv6 timeout yapar)
+      logger: true, // Detaylı log
+      debug: true,  // Detaylı debug
+      connectionTimeout: 10000,
+      socketTimeout: 10000
     });
 
     // Verify transporter
