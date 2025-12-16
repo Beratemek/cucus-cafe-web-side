@@ -2,6 +2,14 @@ const nodemailer = require('nodemailer');
 
 const sendEmail = async (options) => {
   try {
+    // Environment variables kontrolü
+    if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
+      console.error('❌ EMAIL CONFIGURATION ERROR:');
+      console.error('   EMAIL_USER:', process.env.EMAIL_USER ? '✓ Set' : '✗ NOT SET');
+      console.error('   EMAIL_PASS:', process.env.EMAIL_PASS ? '✓ Set' : '✗ NOT SET');
+      throw new Error('Email configuration missing. Please set EMAIL_USER and EMAIL_PASS environment variables.');
+    }
+
     console.log('📧 Email Service: Attempting to send email...');
     console.log('📧 To:', options.email);
     console.log('📧 Subject:', options.subject);
