@@ -28,13 +28,17 @@ export function ForgotPasswordPage() {
       const data = await response.json();
 
       if (response.ok) {
-        setMessage({ type: 'success', text: data.message });
+        setMessage({ 
+          type: 'success', 
+          text: `✅ ${data.message}\n\n📧 Lütfen email kutunuzu kontrol edin. Spam klasörünü de kontrol etmeyi unutmayın!` 
+        });
         setEmail('');
       } else {
-        setMessage({ type: 'error', text: data.message });
+        setMessage({ type: 'error', text: `❌ ${data.message}` });
       }
     } catch (error) {
-      setMessage({ type: 'error', text: 'Bir hata oluştu. Lütfen tekrar deneyin.' });
+      console.error('Error:', error);
+      setMessage({ type: 'error', text: '❌ Bağlantı hatası. Lütfen internet bağlantınızı kontrol edin ve tekrar deneyin.' });
     } finally {
       setIsLoading(false);
     }

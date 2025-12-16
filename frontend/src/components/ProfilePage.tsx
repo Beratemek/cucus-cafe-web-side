@@ -194,7 +194,10 @@ export function ProfilePage({ initialTab = 'login' }: ProfilePageProps) {
   // --- ŞİFRE UNUTTUM (ADIM 1) ---
   const handleForgotPassword = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!forgotEmail) { alert("Lütfen e-posta adresinizi girin."); return; }
+    if (!forgotEmail) { 
+      alert("Lütfen e-posta adresinizi girin."); 
+      return; 
+    }
 
     try {
       const response = await fetch(`${AUTH_API_URL}/forgot-password`, {
@@ -205,15 +208,16 @@ export function ProfilePage({ initialTab = 'login' }: ProfilePageProps) {
       const data = await response.json();
 
       if (response.ok) {
-        // Backend şu an token'ı response içinde dönüyor (geliştirme ortamı için)
-        setResetToken(data.resetToken); 
-        setAuthView('reset'); // 2. Adıma geç
-        alert("Güvenlik kodu oluşturuldu (Simülasyon). Yeni şifrenizi belirleyebilirsiniz.");
+        // Başarılı - Kullanıcıya email gönderildiğini söyle
+        alert(`✅ Şifre sıfırlama linki ${forgotEmail} adresinize gönderildi!\n\n📧 Lütfen email kutunuzu kontrol edin ve spam klasörünü de kontrol etmeyi unutmayın.`);
+        setAuthView('tabs'); // Giriş ekranına dön
+        setForgotEmail(''); // Email alanını temizle
       } else {
-        alert("Hata: " + data.message);
+        alert("❌ Hata: " + data.message);
       }
     } catch (error) {
       console.error("Şifre unuttum hatası:", error);
+      alert("❌ Bağlantı hatası. Lütfen internet bağlantınızı kontrol edin.");
     }
   };
 
