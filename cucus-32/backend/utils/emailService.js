@@ -17,13 +17,15 @@ const sendEmail = async (options) => {
     console.log('📧 EMAIL_PASS configured:', process.env.EMAIL_PASS ? 'Yes ✓' : 'No ✗');
 
     const transporter = nodemailer.createTransport({
-      service: 'gmail',
+      host: 'smtp.gmail.com',
+      port: 465,
+      secure: true, // SSL kullan
       auth: {
         user: process.env.EMAIL_USER,
         pass: process.env.EMAIL_PASS,
       },
-      connectionTimeout: 30000, // 30 saniye
-      socketTimeout: 30000, // 30 saniye
+      connectionTimeout: 60000, // 60 saniye
+      socketTimeout: 60000, // 60 saniye
     });
 
     // Verify transporter
