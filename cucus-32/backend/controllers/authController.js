@@ -4,6 +4,7 @@ const jwt = require('jsonwebtoken');
 const generateLoyaltyNumber = require('../utils/sadakatNoGenerator');
 const sendEmail = require('../utils/emailService');
 const crypto = require('crypto');
+const { passwordResetEmail, emailVerificationEmail } = require('../utils/emailTemplates');
 
 //Yeni Kullanıcı Kaydı
 exports.register = async (req, res) => {
@@ -50,19 +51,16 @@ exports.register = async (req, res) => {
     );
 
     // Doğrulama Maili Gönder
-    const verificationUrl = `${process.env.CLIENT_URL || 'http://localhost:5173'}/verify-email?token=${verificationToken}`;
+    const verificationUrl = `${process.env.CLIENT_URL || 'https://cucus.online'}/verify-email.html?token=${verificationToken}`;
     
-    const message = `
-      <h1>Hesap Doğrulama</h1>
-      <p>Lütfen hesabınızı doğrulamak için aşağıdaki linke tıklayın:</p>
-      <a href="${verificationUrl}">${verificationUrl}</a>
-    `;
+    const userName = `${newUser.name} ${newUser.surname}`;
+    const htmlContent = emailVerificationEmail(verificationUrl, userName);
 
     try {
       await sendEmail({
         email: newUser.email,
-        subject: 'Email Doğrulama - CuCu\'s Coffee',
-        html: message
+        subject: '📧 Email Doğrulama - CuCu\'s Coffee & Cake',
+        html: htmlContent
       });
     } catch (emailError) {
       console.error("Email gönderme hatası:", emailError);
@@ -179,9 +177,15 @@ exports.forgotPassword = async (req, res) => {
     if (!email)
       return res.status(400).json({ message: "Email zorunludur." });
 
+    console.log('🔍 Şifre sıfırlama isteği:', email);
+
     const u = await user.findOne({ email });
-    if (!u)
+    if (!u) {
+      console.log('⚠️  Kullanıcı bulunamadı:', email);
       return res.status(400).json({ message: "Bu email ile kullanıcı bulunamadı." });
+    }
+
+    console.log('✓ Kullanıcı bulundu:', email);
 
     // Reset Token Oluştur (Crypto ile)
     const resetToken = crypto.randomBytes(20).toString('hex');
@@ -192,20 +196,17 @@ exports.forgotPassword = async (req, res) => {
     await u.save();
 
     // Reset URL
-    const resetUrl = `${process.env.CLIENT_URL || 'http://localhost:5173'}/reset-password?token=${resetToken}`;
+    const resetUrl = `${process.env.CLIENT_URL || 'https://cucus.online'}/reset-password.html?token=${resetToken}`;
 
-    const message = `
-      <h1>Şifre Sıfırlama</h1>
-      <p>Şifrenizi sıfırlamak için aşağıdaki linke tıklayın:</p>
-      <a href="${resetUrl}">${resetUrl}</a>
-      <p>Bu link 10 dakika geçerlidir.</p>
-    `;
+    // Profesyonel email şablonu
+    const userName = `${u.name} ${u.surname}`;
+    const htmlContent = passwordResetEmail(resetUrl, userName);
 
     try {
       await sendEmail({
         email: u.email,
-        subject: 'Şifre Sıfırlama - CuCu\'s Coffee',
-        html: message
+        subject: '🔐 Şifre Sıfırlama - CuCu\'s Coffee & Cake',
+        html: htmlContent
       });
 
       console.log('✓ Password reset email sent to:', u.email);
@@ -220,7 +221,15 @@ exports.forgotPassword = async (req, res) => {
     }
 
   } catch (error) {
-    console.log("Forgot Password Error:", error);
+    console.error("❌ Forgot Password Error:", error.message);
+    console.error("   Error name:", error.name);
+    console.error("   Stack:", error.stack);
+    
+    // MongoDB connection error özel mesajı
+    if (error.name === 'MongooseServerSelectionError' || error.message.includes('buffering timed out')) {
+      return res.status(500).json({ message: "Veritabanı bağlantı hatası. Lütfen daha sonra tekrar deneyin." });
+    }
+    
     return res.status(500).json({ message: "Sunucu Hatası!" });
   }
 };

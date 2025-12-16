@@ -4,7 +4,7 @@ npm-debug.log*
 yarn-error.log*
 
 # Env files
-.env
+# .env (commented out - .env is now tracked)
 .env.local
 .env.*.local
 

@@ -20,6 +20,9 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
+// Static files
+app.use(express.static('public'));
+
 app.use("/api/auth", authRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/products", productRoutes);
@@ -34,10 +37,19 @@ app.get('/', (req, res) => {
 
 const PORT = process.env.PORT || 4000;
 
-db().then(() => {
-  app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
+// MongoDB bağlantısını dene, bağlanamasa bile devam et
+db()
+  .then(() => {
+    console.log('✅ MongoDB Connected - Starting server...');
+  })
+  .catch(err => {
+    console.warn('⚠️  MongoDB Connection Failed:', err.message);
+    console.warn('⚠️  Server will start WITHOUT database connection');
+  })
+  .finally(() => {
+    app.listen(PORT, () => {
+      console.log(`\n🚀 Server is running on port ${PORT}`);
+      console.log(`📝 Forgot Password: http://localhost:${PORT}/forgot-password.html`);
+      console.log(`🔐 Reset Password: http://localhost:${PORT}/reset-password.html\n`);
+    });
   });
-}).catch(err => {
-  console.error("Failed to connect to database:", err);
-});
