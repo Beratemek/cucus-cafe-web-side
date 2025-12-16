@@ -202,23 +202,22 @@ exports.forgotPassword = async (req, res) => {
     const userName = `${u.name} ${u.surname}`;
     const htmlContent = passwordResetEmail(resetUrl, userName);
 
-    try {
-      await sendEmail({
-        email: u.email,
-        subject: '🔐 Şifre Sıfırlama - CuCu\'s Coffee & Cake',
-        html: htmlContent
-      });
-
-      console.log('✓ Password reset email sent to:', u.email);
-      res.status(200).json({ message: "Şifre sıfırlama linki email adresinize gönderildi." });
-    } catch (err) {
+    // EMAIL GÖNDERİMİNİ ASYNC YAP - KULLANICIYA HEMEN RESPONSE DÖN
+    // Email arka planda gönderilecek, kullanıcı beklemeyecek
+    sendEmail({
+      email: u.email,
+      subject: '🔐 Şifre Sıfırlama - CuCu\'s Coffee & Cake',
+      html: htmlContent
+    }).then(() => {
+      console.log('✅ Password reset email sent to:', u.email);
+    }).catch((err) => {
       console.error('❌ Failed to send password reset email:', err.message);
       console.error('❌ Error details:', err);
-      u.resetPasswordToken = undefined;
-      u.resetPasswordExpires = undefined;
-      await u.save();
-      return res.status(500).json({ message: "Email gönderilemedi. Lütfen daha sonra tekrar deneyin." });
-    }
+    });
+
+    // Kullanıcıya hemen başarılı response dön
+    console.log('✓ Password reset token created for:', u.email);
+    res.status(200).json({ message: "Şifre sıfırlama linki email adresinize gönderildi." });
 
   } catch (error) {
     console.error("❌ Forgot Password Error:", error.message);
