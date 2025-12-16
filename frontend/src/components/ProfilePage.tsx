@@ -199,9 +199,9 @@ export function ProfilePage({ initialTab = 'login' }: ProfilePageProps) {
       return; 
     }
 
-    // 30 saniye timeout
+    // 60 saniye timeout (Render cold start için)
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 30000);
+    const timeoutId = setTimeout(() => controller.abort(), 60000);
 
     try {
       const response = await fetch(`${AUTH_API_URL}/forgot-password`, {
