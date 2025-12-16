@@ -342,8 +342,8 @@ export function ProfilePage({ initialTab = 'login' }: ProfilePageProps) {
                         </div>
                         <div className="flex items-center justify-between text-sm">
                           <label className="flex items-center gap-2 cursor-pointer text-[#8B5E3C]"><input type="checkbox" checked={rememberMe} onChange={(e) => setRememberMe(e.target.checked)} className="rounded border-[#C8A27A] text-[#8B5E3C] focus:ring-[#C8A27A]" /><span>Beni hatırla</span></label>
-                          {/* ŞİFREMİ UNUTTUM BUTONU - Görünümü Değiştirir */}
-                          <button type="button" onClick={() => setAuthView('forgot')} className="text-[#8B5E3C] hover:text-[#2D1B12] font-semibold">Şifremi unuttum</button>
+                          {/* ŞİFREMİ UNUTTUM BUTONU - Ayrı sayfaya yönlendir */}
+                          <button type="button" onClick={() => navigate('/forgot-password')} className="text-[#8B5E3C] hover:text-[#2D1B12] font-semibold">Şifremi unuttum</button>
                         </div>
                         <Button type="submit" className="w-full bg-gradient-to-r from-[#8B5E3C] to-[#8B5E3C] hover:from-[#2D1B12] hover:to-[#2D1B12] text-white border-0 rounded-full shadow-md">Giriş Yap</Button>
                       </form>
