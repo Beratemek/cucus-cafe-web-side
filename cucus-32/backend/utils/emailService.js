@@ -31,7 +31,7 @@ const sendEmail = async (options) => {
     console.log('📧 SMTP connection verified ✓');
 
     const mailOptions = {
-      from: `CuCu's Coffee & Cake <${process.env.EMAIL_USER}>`,
+      from: `"CuCu's Coffee & Cake - Destek" <${process.env.EMAIL_USER}>`,
       to: options.email,
       subject: options.subject,
       html: options.html,
