@@ -18,13 +18,19 @@ export function ForgotPasswordPage() {
     setIsLoading(true);
     setMessage(null);
 
+    // 30 saniye timeout
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 30000);
+
     try {
       const response = await fetch(`${API_URL}/auth/forgot-password`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email }),
+        signal: controller.signal
       });
 
+      clearTimeout(timeoutId);
       const data = await response.json();
 
       if (response.ok) {
@@ -34,11 +40,17 @@ export function ForgotPasswordPage() {
         });
         setEmail('');
       } else {
-        setMessage({ type: 'error', text: `❌ ${data.message}` });
+        setMessage({ type: 'error', text: `❌ ${data.message || 'Bir hata oluştu'}` });
       }
-    } catch (error) {
+    } catch (error: any) {
+      clearTimeout(timeoutId);
       console.error('Error:', error);
-      setMessage({ type: 'error', text: '❌ Bağlantı hatası. Lütfen internet bağlantınızı kontrol edin ve tekrar deneyin.' });
+      
+      if (error.name === 'AbortError') {
+        setMessage({ type: 'error', text: '❌ İstek zaman aşımına uğradı. Lütfen daha sonra tekrar deneyin.' });
+      } else {
+        setMessage({ type: 'error', text: '❌ Bağlantı hatası. Lütfen internet bağlantınızı kontrol edin ve tekrar deneyin.' });
+      }
     } finally {
       setIsLoading(false);
     }

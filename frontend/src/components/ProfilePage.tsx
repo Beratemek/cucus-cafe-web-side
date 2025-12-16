@@ -199,12 +199,19 @@ export function ProfilePage({ initialTab = 'login' }: ProfilePageProps) {
       return; 
     }
 
+    // 30 saniye timeout
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 30000);
+
     try {
       const response = await fetch(`${AUTH_API_URL}/forgot-password`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: forgotEmail })
+        body: JSON.stringify({ email: forgotEmail }),
+        signal: controller.signal
       });
+      
+      clearTimeout(timeoutId);
       const data = await response.json();
 
       if (response.ok) {
@@ -213,11 +220,17 @@ export function ProfilePage({ initialTab = 'login' }: ProfilePageProps) {
         setAuthView('tabs'); // Giriş ekranına dön
         setForgotEmail(''); // Email alanını temizle
       } else {
-        alert("❌ Hata: " + data.message);
+        alert("❌ Hata: " + (data.message || 'Bir hata oluştu'));
       }
-    } catch (error) {
+    } catch (error: any) {
+      clearTimeout(timeoutId);
       console.error("Şifre unuttum hatası:", error);
-      alert("❌ Bağlantı hatası. Lütfen internet bağlantınızı kontrol edin.");
+      
+      if (error.name === 'AbortError') {
+        alert("❌ İstek zaman aşımına uğradı. Lütfen daha sonra tekrar deneyin.");
+      } else {
+        alert("❌ Bağlantı hatası. Lütfen internet bağlantınızı kontrol edin.");
+      }
     }
   };
 
