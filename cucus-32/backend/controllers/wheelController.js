@@ -58,6 +58,8 @@ exports.spinWheel = async (req, res) => {
         }
 
         // Günlük çark çevirme kontrolü
+        // Günlük çark çevirme kontrolü (Kaldırıldı)
+        /*
         const now = new Date();
         const lastSpin = user.lastWheelSpin;
 
@@ -70,6 +72,7 @@ exports.spinWheel = async (req, res) => {
                 });
             }
         } 
+        */ 
 
 
         // Ödül seç

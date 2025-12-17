@@ -131,7 +131,7 @@ export function WheelOfFortune({ isOpen, onOpenChange }: WheelOfFortuneProps) {
         <DialogHeader>
           <DialogTitle className="text-2xl text-center text-[#2D1B12]">Fırsat Çarkı</DialogTitle>
           <DialogDescription className="text-center text-[#8B5E3C] text-sm">
-            Günde 1 kez çevirme hakkın var!
+            Bol şanslar!
           </DialogDescription>
         </DialogHeader>
 
