@@ -7,7 +7,16 @@ import { Label } from './ui/label';
 import { Badge } from './ui/badge';
 import { Card } from './ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
-import { User, LogOut, Award, Gift, Star, Sparkles, Check, Mail, Lock, Phone, ArrowLeft, KeyRound } from 'lucide-react';
+import { User, LogOut, Award, Gift, Star, Sparkles, Check, Mail, Lock, Phone, ArrowLeft, KeyRound, Coffee, Loader2 } from 'lucide-react';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "./ui/dialog";
+import { toast } from "sonner";
 
 import { API_URL } from '../config';
 
@@ -58,6 +67,10 @@ export function ProfilePage({ initialTab = 'login' }: ProfilePageProps) {
   const [forgotEmail, setForgotEmail] = useState('');
   const [resetToken, setResetToken] = useState(''); // Backend'den gelen token
   const [newPassword, setNewPassword] = useState('');
+
+  // Puan Çevirme Dialog State
+  const [isConvertDialogOpen, setIsConvertDialogOpen] = useState(false);
+  const [isConverting, setIsConverting] = useState(false);
 
   // Sayfa Yüklenmesi
   useEffect(() => {
@@ -122,7 +135,8 @@ export function ProfilePage({ initialTab = 'login' }: ProfilePageProps) {
         if (rememberMe) localStorage.setItem('token', data.token);
         else sessionStorage.setItem('token', data.token);
         
-        alert("Giriş Başarılı!");
+        
+        toast.success("Giriş Başarılı! Hoş geldiniz.");
         fetchCoupons(data.token);
         setUserInfo({
           name: `${data.user.name} ${data.user.surname}`,
@@ -133,11 +147,11 @@ export function ProfilePage({ initialTab = 'login' }: ProfilePageProps) {
         });
         setIsLoggedIn(true);
       } else {
-        alert(`Giriş Başarısız: ${data.message}`);
+        toast.error(`Giriş Başarısız: ${data.message}`);
       }
     } catch (error) {
       console.error("Login Hatası:", error);
-      alert("Sunucuya bağlanılamadı.");
+      toast.error("Sunucuya bağlanılamadı.");
     }
   };
 
@@ -148,7 +162,7 @@ export function ProfilePage({ initialTab = 'login' }: ProfilePageProps) {
     const surname = nameParts.length > 1 ? nameParts.pop() : ''; 
     const name = nameParts.join(' '); 
 
-    if (!name || !surname) { alert("Lütfen Ad ve Soyad giriniz."); return; }
+    if (!name || !surname) { toast.warning("Lütfen Ad ve Soyad giriniz."); return; }
 
     try {
       const response = await fetch(`${AUTH_API_URL}/register`, {
@@ -162,7 +176,7 @@ export function ProfilePage({ initialTab = 'login' }: ProfilePageProps) {
 
       if (response.ok) {
         localStorage.setItem('token', data.token);
-        alert("Kayıt Başarılı! Hoşgeldiniz.");
+        toast.success("Kayıt Başarılı! Hoş geldiniz.");
         fetchCoupons(data.token);
         setUserInfo({
           name: `${data.user.name} ${data.user.surname}`,
@@ -173,11 +187,11 @@ export function ProfilePage({ initialTab = 'login' }: ProfilePageProps) {
         });
         setIsLoggedIn(true);
       } else {
-        alert(`Hata: ${data.message}`);
+        toast.error(`Hata: ${data.message}`);
       }
     } catch (error) {
       console.error("Kayıt Hatası:", error);
-      alert("Sunucuya bağlanılamadı.");
+      toast.error("Sunucuya bağlanılamadı.");
     }
   };
 
@@ -195,7 +209,7 @@ export function ProfilePage({ initialTab = 'login' }: ProfilePageProps) {
   const handleForgotPassword = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!forgotEmail) { 
-      alert("Lütfen e-posta adresinizi girin."); 
+      toast.warning("Lütfen e-posta adresinizi girin."); 
       return; 
     }
 
@@ -216,20 +230,21 @@ export function ProfilePage({ initialTab = 'login' }: ProfilePageProps) {
 
       if (response.ok) {
         // Başarılı - Kullanıcıya email gönderildiğini söyle
-        alert(`✅ Şifre sıfırlama linki ${forgotEmail} adresinize gönderildi!\n\n📧 Lütfen email kutunuzu kontrol edin ve spam klasörünü de kontrol etmeyi unutmayın.`);
+        toast.success(`Şifre sıfırlama linki ${forgotEmail} adresinize gönderildi!`);
+        toast.info("Lütfen email kutunuzu (ve spam klasörünü) kontrol edin.");
         setAuthView('tabs'); // Giriş ekranına dön
         setForgotEmail(''); // Email alanını temizle
       } else {
-        alert("❌ Hata: " + (data.message || 'Bir hata oluştu'));
+        toast.error("Hata: " + (data.message || 'Bir hata oluştu'));
       }
     } catch (error: any) {
       clearTimeout(timeoutId);
       console.error("Şifre unuttum hatası:", error);
       
       if (error.name === 'AbortError') {
-        alert("❌ İstek zaman aşımına uğradı. Lütfen daha sonra tekrar deneyin.");
+        toast.error("İstek zaman aşımına uğradı. Lütfen daha sonra tekrar deneyin.");
       } else {
-        alert("❌ Bağlantı hatası. Lütfen internet bağlantınızı kontrol edin.");
+        toast.error("Bağlantı hatası. Lütfen internet bağlantınızı kontrol edin.");
       }
     }
   };
@@ -237,7 +252,7 @@ export function ProfilePage({ initialTab = 'login' }: ProfilePageProps) {
   // --- ŞİFRE SIFIRLAMA (ADIM 2) ---
   const handleResetPassword = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newPassword) { alert("Lütfen yeni şifre girin."); return; }
+    if (!newPassword) { toast.warning("Lütfen yeni şifre girin."); return; }
 
     try {
       const response = await fetch(`${AUTH_API_URL}/reset-password`, {
@@ -248,11 +263,11 @@ export function ProfilePage({ initialTab = 'login' }: ProfilePageProps) {
       const data = await response.json();
 
       if (response.ok) {
-        alert("Şifreniz başarıyla güncellendi! Giriş yapabilirsiniz.");
+        toast.success("Şifreniz başarıyla güncellendi! Giriş yapabilirsiniz.");
         setAuthView('tabs'); // Giriş ekranına dön
         setLoginEmail(forgotEmail); // Kolaylık olsun diye emaili doldur
       } else {
-        alert("Hata: " + data.message);
+        toast.error("Hata: " + data.message);
       }
     } catch (error) {
       console.error("Şifre sıfırlama hatası:", error);
@@ -311,9 +326,58 @@ export function ProfilePage({ initialTab = 'login' }: ProfilePageProps) {
                     
                     {userInfo.points >= 500 && (
                          <Button 
+                            onClick={() => setIsConvertDialogOpen(true)}
+                            className="mt-4 bg-[#2D1B12] text-white hover:bg-[#8B5E3C] border-0 gap-2"
+                         >
+                            <Coffee className="w-4 h-4" /> 500 Puanı Kahveye Çevir
+                         </Button>
+                    )}
+
+                  </div>
+                  <div className="text-6xl">🏆</div>
+                </div>
+              </div>
+            </div>
+
+            {/* Puan Çevirme Dialog */}
+            <Dialog open={isConvertDialogOpen} onOpenChange={setIsConvertDialogOpen}>
+                <DialogContent className="sm:max-w-md bg-[#FFF9F5] border-none shadow-2xl rounded-3xl">
+                    <DialogHeader>
+                        <DialogTitle className="text-2xl text-[#2D1B12] flex items-center gap-2">
+                            ☕ Ücretsiz Kahve Fırsatı
+                        </DialogTitle>
+                        <DialogDescription className="text-[#8B5E3C] pt-2">
+                            Harika haber! Biriktirdiğiniz puanları kullanarak ücretsiz kahve kuponu oluşturabilirsiniz.
+                        </DialogDescription>
+                    </DialogHeader>
+                    
+                    <div className="bg-white p-4 rounded-xl border border-[#E6D3BA] my-2">
+                        <div className="flex justify-between items-center mb-2">
+                            <span className="text-sm text-[#8B5E3C]">Mevcut Puan:</span>
+                            <span className="font-bold text-[#2D1B12]">{userInfo.points}</span>
+                        </div>
+                        <div className="flex justify-between items-center mb-2">
+                            <span className="text-sm text-[#8B5E3C]">Gerekli Puan:</span>
+                            <span className="font-bold text-red-500">-500</span>
+                        </div>
+                        <div className="h-px bg-[#E6D3BA] my-2"></div>
+                        <div className="flex justify-between items-center">
+                            <span className="text-sm font-bold text-[#8B5E3C]">Kalan Puan:</span>
+                            <span className="font-bold text-[#2D1B12]">{userInfo.points - 500}</span>
+                        </div>
+                    </div>
+
+                    <DialogFooter className="flex gap-2 sm:gap-0">
+                        <Button 
+                            variant="ghost" 
+                            onClick={() => setIsConvertDialogOpen(false)}
+                            className="text-[#8B5E3C] hover:bg-[#E6D3BA]/20 hover:text-[#2D1B12]"
+                        >
+                            Vazgeç
+                        </Button>
+                        <Button 
                             onClick={async () => {
-                                if(!confirm("500 puan karşılığında ücretsiz kahve kuponu oluşturmak istiyor musunuz?")) return;
-                                
+                                setIsConverting(true);
                                 try {
                                     const token = localStorage.getItem('token') || sessionStorage.getItem('token');
                                     const response = await fetch(`${API_URL}/wheel/convert-points`, {
@@ -323,29 +387,29 @@ export function ProfilePage({ initialTab = 'login' }: ProfilePageProps) {
                                     const data = await response.json();
                                     
                                     if(response.ok) {
-                                        alert(data.message);
-                                        // Update local state
+                                        toast.success("Kupon başarıyla oluşturuldu! 'Kuponlarım' sekmesinden görüntüleyebilirsiniz.");
                                         setUserInfo(prev => ({ ...prev, points: data.remainingPoints }));
-                                        fetchCoupons(token!); // Refresh coupons
+                                        fetchCoupons(token!); 
+                                        setIsConvertDialogOpen(false);
                                     } else {
-                                        alert(data.message);
+                                        toast.error(data.message || "İşlem başarısız oldu.");
                                     }
                                 } catch (err) {
                                     console.error(err);
-                                    alert("İşlem sırasında bir hata oluştu.");
+                                    toast.error("Bir hata oluştu.");
+                                } finally {
+                                    setIsConverting(false);
                                 }
                             }}
-                            className="mt-4 bg-[#2D1B12] text-white hover:bg-[#8B5E3C] border-0"
-                         >
-                            ☕ 500 Puanı Kahveye Çevir
-                         </Button>
-                    )}
-
-                  </div>
-                  <div className="text-6xl">🏆</div>
-                </div>
-              </div>
-            </div>
+                            disabled={isConverting}
+                            className="bg-[#2D1B12] hover:bg-[#8B5E3C] text-white"
+                        >
+                            {isConverting ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Gift className="w-4 h-4 mr-2" />}
+                            Onayla ve Dönüştür
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
 
             <div>
               <div className="flex items-center gap-2 mb-6"><Gift className="w-6 h-6 text-[#8B5E3C]" /><h2 className="text-3xl text-[#2D1B12]">Kazanılan Kuponlarım</h2></div>

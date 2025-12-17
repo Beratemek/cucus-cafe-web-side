@@ -12,6 +12,7 @@ import { ForgotPasswordPage } from './components/ForgotPasswordPage';
 import { ResetPasswordPage } from './components/ResetPasswordPage';
 import { VerifyEmailPage } from './components/VerifyEmailPage';
 import { API_URL } from './config';
+import { Toaster } from 'sonner';
 
 function MainLayout({ children }: { children: React.ReactNode }) {
   const navigate = useNavigate();
@@ -34,6 +35,7 @@ function MainLayout({ children }: { children: React.ReactNode }) {
         onNavigate={(page) => navigate(page === 'home' ? '/' : `/${page}`)}
         onAdminClick={() => navigate('/admin')}
       />
+      <Toaster richColors />
       {children}
     </div>
   );
