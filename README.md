@@ -28,7 +28,7 @@ npm install
 `.env` dosyasını oluşturun ve gerekli değişkenleri ekleyin (Örnek):
 ```env
 MONGO_URI=mongodb+srv://<kullanici>:<sifre>@cluster.mongodb.net/cucus
-JWT_SECRET=supersecretkey123
+JWT_SECRET=password123
 PORT=4000
 ```
 
