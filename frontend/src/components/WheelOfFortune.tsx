@@ -22,7 +22,6 @@ export function WheelOfFortune({ isOpen, onOpenChange }: WheelOfFortuneProps) {
   const [wonPrize, setWonPrize] = useState<any>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  // Dilimler
   const segments = [
     { id: 1, type: 'points', value: 10, label: '10 Puan', color: '#8B5E3C' },
     { id: 2, type: 'coupon', value: 5, label: '%5 İndirim', color: '#C8A27A' },
@@ -57,7 +56,7 @@ export function WheelOfFortune({ isOpen, onOpenChange }: WheelOfFortuneProps) {
     setErrorMessage(null);
 
     try {
-      // Backend isteği
+
       const response = await fetch(`${API_URL}/wheel/spin`, {
         method: "POST",
         headers: { "Authorization": `Bearer ${token}` }
@@ -74,10 +73,9 @@ export function WheelOfFortune({ isOpen, onOpenChange }: WheelOfFortuneProps) {
       const backendReward = data.reward;
       console.log("Backend Reward:", backendReward);
       
-      // Hangi dilime denk geliyor? (Değerleri logla)
+      
       let winningIndex = segments.findIndex(s => {
         const typeMatch = s.type === backendReward.type;
-        // Value karşılaştırması için her ikisini de sayıya çeviriyoruz
         const valueMatch = Number(s.value) === Number(backendReward.value);
         return typeMatch && valueMatch;
       });
@@ -86,23 +84,18 @@ export function WheelOfFortune({ isOpen, onOpenChange }: WheelOfFortuneProps) {
 
       if (winningIndex === -1) {
         console.warn("Ödül segmentlerde bulunamadı, varsayılan (Pas) seçiliyor.");
-        winningIndex = 3; // Bulamazsa Pas (Index 3)
+        winningIndex = 3; 
       }
 
-      // --- DÖNÜŞ AÇISI HESAPLAMA ---
-      
-      const segmentAngle = 360 / segments.length; // 45 derece
-      const halfSegment = segmentAngle / 2; // 22.5 derece (Tam ortalamak için)
 
-      // Hedefin merkezine denk gelen açı (Başlangıç noktasına göre)
-      // Visual 0 (Top) is aligned with Internal 0 via SVG transform
-      // Rastgelelik ekle: Hedef dilimin içinde rastgele bir yere (merkezden +/- 15 derece sapma)
+      
+      const segmentAngle = 360 / segments.length;
+      const halfSegment = segmentAngle / 2;
+
       const randomOffset = (Math.random() - 0.5) * (segmentAngle * 0.8); 
       const targetAngle = (winningIndex * segmentAngle) + halfSegment + randomOffset;
 
-      // Çarkın şimdiki pozisyonundan ileriye doğru dönmesi için hesaplama
-      // 360 - targetAngle: İlgili noktayı 0 noktasına (Visual Top) getirmek için gereken dönüş
-      const fullRotations = 360 * 5; // En az 5 tam tur
+      const fullRotations = 360 * 5; 
       const finalRotation = fullRotations + (360 - targetAngle); 
       
       console.log(` Target Angle: ${targetAngle}, Rotation: ${finalRotation}`);
@@ -145,21 +138,19 @@ export function WheelOfFortune({ isOpen, onOpenChange }: WheelOfFortuneProps) {
           <div className="relative flex flex-col items-center mt-8 mb-4">
             <div className="relative w-full max-w-[280px] aspect-square mx-auto">
               
-              {/* POINTER (OK İŞARETİ) */}
               <div className="absolute -top-6 left-1/2 -translate-x-1/2 z-50 filter drop-shadow-md">
                 <svg width="40" height="40" viewBox="0 0 24 24" fill="#2D1B12">
                   <path d="M12 21L4 6h16L12 21z" stroke="white" strokeWidth="2" strokeLinejoin="round" />
                 </svg>
               </div>
 
-              {/* DÖNEN ÇARK */}
               <motion.div
                 className="w-full h-full rounded-full relative"
                 animate={{ rotate: rotation }}
-                transition={{ duration: 5.5, ease: [0.22, 1, 0.36, 1] }} // Daha yumuşak duruş (cubic-bezier)
+                transition={{ duration: 5.5, ease: [0.22, 1, 0.36, 1] }}
                 style={{ boxShadow: "0 10px 30px rgba(0,0,0,0.2)" }}
               >
-                {/* SVG'ye doğrudan transform veriyoruz, Tailwind'e bırakmıyoruz */}
+
                 <svg viewBox="0 0 200 200" className="w-full h-full" transform="rotate(-90)"> 
                   <circle cx="100" cy="100" r="98" fill="#FFF9F5" stroke="#2D1B12" strokeWidth="4" />
                   
@@ -167,13 +158,13 @@ export function WheelOfFortune({ isOpen, onOpenChange }: WheelOfFortuneProps) {
                     const startAngle = index * degreesPerSlice;
                     const endAngle = (index + 1) * degreesPerSlice;
                     
-                    // SVG Ark Çizimi
+                    
                     const x1 = 100 + 96 * Math.cos(Math.PI * startAngle / 180);
                     const y1 = 100 + 96 * Math.sin(Math.PI * startAngle / 180);
                     const x2 = 100 + 96 * Math.cos(Math.PI * endAngle / 180);
                     const y2 = 100 + 96 * Math.sin(Math.PI * endAngle / 180);
                     
-                    // Metin Konumu (Yarıçapı biraz azalttık ki merkeze yakın olsun)
+
                     const midAngle = (startAngle + endAngle) / 2;
                     const textX = 100 + 60 * Math.cos(Math.PI * midAngle / 180);
                     const textY = 100 + 60 * Math.sin(Math.PI * midAngle / 180);
@@ -205,7 +196,6 @@ export function WheelOfFortune({ isOpen, onOpenChange }: WheelOfFortuneProps) {
                 </svg>
               </motion.div>
 
-              {/* MERKEZ BUTON */}
               <button
                 onClick={handleSpin}
                 disabled={isSpinning || !!wonPrize}
@@ -219,7 +209,6 @@ export function WheelOfFortune({ isOpen, onOpenChange }: WheelOfFortuneProps) {
               </button>
             </div>
 
-            {/* KAZANMA EKRANI */}
             <AnimatePresence>
               {wonPrize && (
                 <motion.div

@@ -280,7 +280,7 @@ export function HomePage({ onNavigate, onNavigateToRegister }: HomePageProps) {
               Özel Ayrıcalıklara Sahip Olun
             </h2>
             <p className="text-lg text-[#8B5E3C] mb-8 max-w-2xl mx-auto">
-              Üye olun, ilk siparişinizde %20 indirim kazanın ve özel kampanyalardan haberdar olun
+              Üye olun ve birçok özel kampanyalarımızdan haberdar olun
             </p>
             <Button size="lg" className="bg-gradient-to-r from-[#8B5E3C] to-[#8B5E3C] hover:from-[#2D1B12] hover:to-[#2D1B12] text-white border-0 px-8 shadow-lg shadow-[#2D1B12]/30 rounded-full" onClick={onNavigateToRegister}>
               Hemen Üye Ol

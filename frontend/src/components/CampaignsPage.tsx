@@ -140,7 +140,7 @@ export function CampaignsPage() {
             </li>
             <li className="flex gap-3">
               <span className="text-[#8B5E3C] flex-shrink-0">•</span>
-              <span>Kampanya kodlarını siparişinizi tamamlamadan önce girmeyi unutmayın.</span>
+              <span>Kampanyaları kullanmak için kasiyere bildirmeyi unutmayın.</span>
             </li>
             <li className="flex gap-3">
               <span className="text-[#8B5E3C] flex-shrink-0">•</span>
@@ -148,7 +148,7 @@ export function CampaignsPage() {
             </li>
             <li className="flex gap-3">
               <span className="text-[#8B5E3C] flex-shrink-0">•</span>
-              <span>Kampanyalardan yararlanmak için üye girişi yapmanız gerekmektedir.</span>
+              <span>Kampanyalardan yararlanmak için üye kaydınız gerekmektedir.</span>
             </li>
           </ul>
         </div>

@@ -4,7 +4,7 @@ const mongoose = require("mongoose");
 const loyaltyHistorySchema = new mongoose.Schema({
     date: { type: Date, default: Date.now },
     amount: { type: Number, required: true },
-    type: { type: String, enum: ["earn", "spend"], required: true }, // earn=puan kazanma, spend=puan harcama
+    type: { type: String, enum: ["earn", "spend"], required: true },
     description: { type: String }
 });
 
@@ -15,7 +15,7 @@ const couponSchema = new mongoose.Schema({
     discountValue: { type: Number, required: true },
     expiryDate: { type: Date, required: true },
     isUsed: { type: Boolean, default: false },
-    earnedFrom: { type: String, default: "wheel" }, // wheel, campaign, etc.
+    earnedFrom: { type: String, default: "wheel" },
     createdAt: { type: Date, default: Date.now }
 });
 
@@ -49,36 +49,34 @@ const userSchema = new mongoose.Schema(
             history: [loyaltyHistorySchema]
         },
 
-        // Çarkı en son ne zaman çevirdi? (24 saat kontrolü için)
         lastWheelSpin: { type: Date },
 
-        // Kazanılan Kuponlar Listesi
         coupons: [
           {
-            code: { type: String, required: true }, // Örn: WHEEL10-XY9Z
+            code: { type: String, required: true },
             discountType: { type: String, enum: ["percent", "amount"], default: "percent" },
             discountValue: { type: Number, required: true }, // Örn: 10 (%10)
             expiryDate: { type: Date, required: true },
-            isUsed: { type: Boolean, default: false }, // Kullanıldı mı?
-            earnedFrom: { type: String, default: "wheel" } // Çarktan mı, admin mi verdi?
+            isUsed: { type: Boolean, default: false },
+            earnedFrom: { type: String, default: "wheel" }
           }
        ],
 
-        // Çark Geçmişi (Log tutmak istersen)
+        // Spin History
         wheelSpins: [
           {
             date: { type: Date, default: Date.now },
-            reward: { type: String }, // "points", "coupon", "retry"
-            rewardValue: { type: mongoose.Schema.Types.Mixed } // 10, 50 veya kupon objesi
+            reward: { type: String },
+            rewardValue: { type: mongoose.Schema.Types.Mixed }
          }
         ],
         
-        // Email Doğrulama
+        // Email Verification
         isVerified: { type: Boolean, default: false },
         verificationToken: { type: String },
         verificationTokenExpires: { type: Date },
 
-        // Şifre Sıfırlama
+        // Password Reset
         resetPasswordToken: { type: String },
         resetPasswordExpires: { type: Date }
     },

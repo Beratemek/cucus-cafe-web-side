@@ -11,5 +11,6 @@ router.get("/history", requireAuth, wheelController.getWheelHistory);
 // Kupon kullanma ve doğrulama
 router.post("/coupons/:code/use", requireAuth, wheelController.useCoupon);
 router.get("/coupons/:code/validate", requireAuth, wheelController.validateCoupon);
+router.post("/convert-points", requireAuth, wheelController.convertPointsToCoupon);
 
 module.exports = router;

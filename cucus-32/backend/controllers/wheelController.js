@@ -1,33 +1,17 @@
 const User = require("../models/user");
 
-// Çark ödül havuzu ve şans oranları
 const wheelPrizes = [
-    // Düşük puanlar (%30)
-    { type: "points", value: 10, weight: 15 },
+    { type: "points", value: 10, weight: 20 },
     { type: "points", value: 25, weight: 15 },
-
-    // Orta puan (%25)
-    { type: "points", value: 50, weight: 25 },
-
-    // Yüksek puan (%15)
-    { type: "points", value: 100, weight: 15 },
-
-    // Çok yüksek puan (%5)
-    { type: "points", value: 250, weight: 5 },
-
-    // İndirim kuponları (%12)
-    { type: "coupon", value: 5, weight: 6 },
-    { type: "coupon", value: 10, weight: 6 },
-
-    // Yüksek indirim (%5)
-    { type: "coupon", value: 15, weight: 3 },
-    { type: "coupon", value: 20, weight: 2 },
-
-    // Tekrar Dene (%8)
-    { type: "retry", value: 0, weight: 8 }
+    { type: "points", value: 50, weight: 20 },
+    { type: "points", value: 100, weight: 10 },
+    { type: "coupon", value: 5, weight: 10 },
+    { type: "coupon", value: 10, weight: 5 },
+    { type: "coupon", value: 20, weight: 5 },
+    { type: "retry", value: 0, weight: 15 }
 ];
 
-// Ağırlıklı rastgele seçim fonksiyonu
+
 function getRandomPrize() {
     const totalWeight = wheelPrizes.reduce((sum, prize) => sum + prize.weight, 0);
     let random = Math.random() * totalWeight;
@@ -39,15 +23,14 @@ function getRandomPrize() {
         }
     }
 
-    return wheelPrizes[0]; // Fallback
+    return wheelPrizes[0];
 }
 
-// Kupon kodu oluşturma (6 karakter - kısa ve akılda kalıcı)
+
 function generateCouponCode() {
     return Math.random().toString(36).substring(2, 8).toUpperCase();
 }
 
-// Çark çevirme
 exports.spinWheel = async (req, res) => {
     try {
         const userId = req.user.id;
@@ -57,14 +40,30 @@ exports.spinWheel = async (req, res) => {
             return res.status(404).json({ message: "Kullanıcı bulunamadı!" });
         }
 
-        // Günlük limit kontrolü kaldırıldı
         const now = new Date();
-        // Ödül seç
+
+
+        if (user.lastWheelSpin) {
+            const lastSpin = new Date(user.lastWheelSpin);
+            const diff = now - lastSpin; // Difference in milliseconds
+            const oneDay = 24 * 60 * 60 * 1000;
+
+            if (diff < oneDay) {
+                const remainingTime = oneDay - diff;
+                const hours = Math.floor(remainingTime / (1000 * 60 * 60));
+                const minutes = Math.floor((remainingTime % (1000 * 60 * 60)) / (1000 * 60));
+                
+                return res.status(403).json({ 
+                    message: `Günde sadece 1 kez çevirebilirsin. Kalan süre: ${hours} saat ${minutes} dakika.` 
+                });
+            }
+        }
+
+
         const prize = getRandomPrize();
         let rewardData = {};
 
         if (prize.type === "points") {
-            // Puan ekle
             user.loyalty.points += prize.value;
             user.loyalty.history.push({
                 amount: prize.value,
@@ -79,7 +78,6 @@ exports.spinWheel = async (req, res) => {
             };
 
         } else if (prize.type === "coupon") {
-            // Kupon oluştur
             const couponCode = generateCouponCode();
             const expiryDate = new Date();
             expiryDate.setDate(expiryDate.getDate() + 30); // 30 gün geçerli
@@ -109,13 +107,12 @@ exports.spinWheel = async (req, res) => {
             };
         }
 
-        // Çark geçmişine ekle
         user.wheelSpins.push({
             reward: prize.type,
             rewardValue: prize.type === "coupon" ? { code: rewardData.code, value: prize.value } : prize.value
         });
 
-        // Son çark çevirme tarihini güncelle
+
         user.lastWheelSpin = now;
 
         await user.save();
@@ -131,7 +128,6 @@ exports.spinWheel = async (req, res) => {
     }
 };
 
-// Kullanıcının kuponlarını listeleme
 exports.getUserCoupons = async (req, res) => {
     try {
         const userId = req.user.id;
@@ -141,7 +137,7 @@ exports.getUserCoupons = async (req, res) => {
             return res.status(404).json({ message: "Kullanıcı bulunamadı!" });
         }
 
-        // Sadece kullanılmamış ve süresi dolmamış kuponları filtrele
+
         const validCoupons = user.coupons.filter(coupon =>
             !coupon.isUsed && new Date(coupon.expiryDate) > new Date()
         );
@@ -157,7 +153,6 @@ exports.getUserCoupons = async (req, res) => {
     }
 };
 
-// Çark geçmişini görüntüleme
 exports.getWheelHistory = async (req, res) => {
     try {
         const userId = req.user.id;
@@ -179,7 +174,6 @@ exports.getWheelHistory = async (req, res) => {
     }
 };
 
-// Kupon kullanma
 exports.useCoupon = async (req, res) => {
     try {
         const userId = req.user.id;
@@ -198,12 +192,11 @@ exports.useCoupon = async (req, res) => {
             return res.status(404).json({ message: "Kupon bulunamadı veya zaten kullanılmış!" });
         }
 
-        // Süre kontrolü
+
         if (new Date(coupon.expiryDate) < new Date()) {
             return res.status(400).json({ message: "Kuponun süresi dolmuş!" });
         }
 
-        // Kuponu kullanılmış olarak işaretle
         coupon.isUsed = true;
         await user.save();
 
@@ -222,7 +215,6 @@ exports.useCoupon = async (req, res) => {
     }
 };
 
-// Kupon doğrulama
 exports.validateCoupon = async (req, res) => {
     try {
         const userId = req.user.id;
@@ -244,7 +236,7 @@ exports.validateCoupon = async (req, res) => {
             });
         }
 
-        // Kullanılmış mı?
+
         if (coupon.isUsed) {
             return res.status(400).json({
                 valid: false,
@@ -252,7 +244,7 @@ exports.validateCoupon = async (req, res) => {
             });
         }
 
-        // Süresi dolmuş mu?
+
         if (new Date(coupon.expiryDate) < new Date()) {
             return res.status(400).json({
                 valid: false,
@@ -276,3 +268,57 @@ exports.validateCoupon = async (req, res) => {
         return res.status(500).json({ message: "Sunucu hatası!" });
     }
 };
+
+// Puanı kupona çevirme
+exports.convertPointsToCoupon = async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const user = await User.findById(userId);
+
+        if (!user) {
+            return res.status(404).json({ message: "Kullanıcı bulunamadı!" });
+        }
+
+        if (user.loyalty.points < 500) {
+            return res.status(400).json({ message: "Yetersiz puan! En az 500 puanınız olmalı." });
+        }
+
+        // Puan düş
+        user.loyalty.points -= 500;
+        user.loyalty.history.push({
+            amount: 500,
+            type: "spend",
+            description: "500 puan ile ücretsiz kahve kuponu alındı"
+        });
+
+        // Kupon oluştur
+        const couponCode = Math.random().toString(36).substring(2, 8).toUpperCase();
+        const expiryDate = new Date();
+        expiryDate.setDate(expiryDate.getDate() + 30); // 30 gün geçerli
+
+        const newCoupon = {
+            code: couponCode,
+            discountType: "percent",
+            discountValue: 100, // %100 indirim
+            expiryDate,
+            isUsed: false,
+            earnedFrom: "loyalty_conversion"
+        };
+
+        user.coupons.push(newCoupon);
+
+        await user.save();
+
+        return res.status(200).json({
+            success: true,
+            message: "Tebrikler! 500 puan karşılığında ücretsiz kahve kuponunuz oluşturuldu.",
+            coupon: newCoupon,
+            remainingPoints: user.loyalty.points
+        });
+
+    } catch (error) {
+        console.error("Convert Points Error:", error);
+        return res.status(500).json({ message: "Sunucu hatası!" });
+    }
+};
+

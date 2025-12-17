@@ -260,8 +260,8 @@ export function ProfilePage({ initialTab = 'login' }: ProfilePageProps) {
   };
 
   const benefits = [
-    'İlk siparişte %20 indirim', 'Her 5 kahvede 1 hediye', 'Doğum günü sürprizi',
-    'Özel kampanyalardan ilk siz haberdar olun', 'Hızlı sipariş imkanı',
+    'İlk siparişinizde %20 indirim', 'Her 500 Puana 1 kahve hediye',
+    'Özel kampanyalardan ilk siz haberdar olun',
   ];
 
   return (
@@ -303,7 +303,44 @@ export function ProfilePage({ initialTab = 'login' }: ProfilePageProps) {
                   <div>
                     <p className="text-[#8B5E3C] mb-1 flex items-center gap-2"><Award className="w-5 h-5" /> Toplam Puanınız</p>
                     <p className="text-5xl text-[#2D1B12]">{userInfo.points}</p>
-                    <p className="text-sm text-[#8B5E3C] mt-2">Bir sonraki hediyeye {Math.max(0, 500 - userInfo.points)} puan kaldı</p>
+                    <p className="text-sm text-[#8B5E3C] mt-2">
+                        {userInfo.points >= 500 
+                            ? "Tebrikler! Ücretsiz kahve alabilirsiniz." 
+                            : `Bir sonraki hediyeye ${Math.max(0, 500 - userInfo.points)} puan kaldı`}
+                    </p>
+                    
+                    {userInfo.points >= 500 && (
+                         <Button 
+                            onClick={async () => {
+                                if(!confirm("500 puan karşılığında ücretsiz kahve kuponu oluşturmak istiyor musunuz?")) return;
+                                
+                                try {
+                                    const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+                                    const response = await fetch(`${API_URL}/wheel/convert-points`, {
+                                        method: 'POST',
+                                        headers: { 'Authorization': `Bearer ${token}` }
+                                    });
+                                    const data = await response.json();
+                                    
+                                    if(response.ok) {
+                                        alert(data.message);
+                                        // Update local state
+                                        setUserInfo(prev => ({ ...prev, points: data.remainingPoints }));
+                                        fetchCoupons(token!); // Refresh coupons
+                                    } else {
+                                        alert(data.message);
+                                    }
+                                } catch (err) {
+                                    console.error(err);
+                                    alert("İşlem sırasında bir hata oluştu.");
+                                }
+                            }}
+                            className="mt-4 bg-[#2D1B12] text-white hover:bg-[#8B5E3C] border-0"
+                         >
+                            ☕ 500 Puanı Kahveye Çevir
+                         </Button>
+                    )}
+
                   </div>
                   <div className="text-6xl">🏆</div>
                 </div>
