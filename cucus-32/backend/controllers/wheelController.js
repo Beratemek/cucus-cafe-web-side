@@ -57,22 +57,7 @@ exports.spinWheel = async (req, res) => {
             return res.status(404).json({ message: "Kullanıcı bulunamadı!" });
         }
 
-        // Günlük çark çevirme kontrolü
-        // Günlük çark çevirme kontrolü (Kaldırıldı)
-        /*
-        const now = new Date();
-        const lastSpin = user.lastWheelSpin;
-
-        if (lastSpin) {
-            const hoursSinceLastSpin = (now - lastSpin) / (1000 * 60 * 60);
-            if (hoursSinceLastSpin < 24) {
-                const hoursRemaining = Math.ceil(24 - hoursSinceLastSpin);
-                return res.status(400).json({
-                    message: `Çarkı ${hoursRemaining} saat sonra tekrar çevirebilirsiniz!`
-                });
-            }
-        } 
-        */ 
+        // Günlük limit kontrolü kaldırıldı
 
 
         // Ödül seç
