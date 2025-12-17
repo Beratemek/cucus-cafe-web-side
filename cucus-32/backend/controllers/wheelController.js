@@ -58,8 +58,7 @@ exports.spinWheel = async (req, res) => {
         }
 
         // Günlük limit kontrolü kaldırıldı
-
-
+        const now = new Date();
         // Ödül seç
         const prize = getRandomPrize();
         let rewardData = {};
