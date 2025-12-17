@@ -107,6 +107,8 @@ export function AdminDashboard({ onLogout, onNavigateHome }: AdminDashboardProps
   const [orderItems, setOrderItems] = useState<OrderItem[]>([]);
   const [loyaltyNumber, setLoyaltyNumber] = useState('');
   const [couponCode, setCouponCode] = useState('');
+  const [appliedCoupon, setAppliedCoupon] = useState<{code: string, discountType: 'percent' | 'amount', discountValue: number} | null>(null);
+  const [couponError, setCouponError] = useState('');
   const [pointsToUse, setPointsToUse] = useState(0);
   const [customerInfo, setCustomerInfo] = useState<Customer | null>(null);
   
@@ -376,6 +378,39 @@ export function AdminDashboard({ onLogout, onNavigateHome }: AdminDashboardProps
   };
 
   // --- SİPARİŞ İŞLEMLERİ ---
+  const handleValidateCoupon = async () => {
+    if (!couponCode || !loyaltyNumber) {
+      setCouponError("Önce müşteri seçin ve kupon kodu girin.");
+      return;
+    }
+    setCouponError('');
+    try {
+      const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+      const response = await fetch(`${API_URL}/orders/validate-coupon`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
+        body: JSON.stringify({ loyaltyNo: loyaltyNumber, couponCode })
+      });
+      const data = await response.json();
+      
+      if (response.ok && data.valid) {
+        setAppliedCoupon({
+          code: data.coupon.code,
+          discountType: data.coupon.discountType,
+          discountValue: data.coupon.discountValue
+        });
+        setCouponError('');
+        alert(`Kupon uygulandı: %${data.coupon.discountType === 'percent' ? data.coupon.discountValue : `₺${data.coupon.discountValue} İndirim`}`);
+      } else {
+        setAppliedCoupon(null);
+        setCouponError(data.message || "Geçersiz kupon.");
+      }
+    } catch (error) {
+      console.error("Kupon doğrulama hatası:", error);
+      setCouponError("Sunucu hatası.");
+    }
+  };
+
   const createOrder = async () => {
     if (orderItems.length === 0) { alert("Sepet boş!"); return; }
     if (!loyaltyNumber) { alert("Lütfen bir müşteri seçiniz."); return; }
@@ -391,7 +426,7 @@ export function AdminDashboard({ onLogout, onNavigateHome }: AdminDashboardProps
       const result = await response.json();
       if (response.ok) {
         alert(`Sipariş başarıyla oluşturuldu!\nKazanılan Puan: ${result.order.pointsEarned}`);
-        setOrderItems([]); setLoyaltyNumber(''); setCouponCode(''); setPointsToUse(0); setCustomerInfo(null); fetchOrders(); 
+        setOrderItems([]); setLoyaltyNumber(''); setCouponCode(''); setAppliedCoupon(null); setPointsToUse(0); setCustomerInfo(null); fetchOrders(); 
       } else { alert(`Hata: ${result.message}`); }
     } catch (error) { alert("Sunucu ile bağlantı kurulamadı."); }
   };
@@ -512,7 +547,25 @@ export function AdminDashboard({ onLogout, onNavigateHome }: AdminDashboardProps
   };
 
   const calculateSubtotal = () => orderItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-  const calculateTotal = () => Math.max(0, calculateSubtotal() - pointsToUse);
+  
+  const calculateCouponDiscount = () => {
+    if (!appliedCoupon) return 0;
+    const subtotal = calculateSubtotal();
+    let discount = 0;
+    if (appliedCoupon.discountType === 'amount') {
+      discount = appliedCoupon.discountValue;
+    } else {
+      discount = (subtotal * appliedCoupon.discountValue) / 100;
+    }
+    return Math.min(discount, subtotal);
+  };
+
+  const calculateTotal = () => {
+    const sub = calculateSubtotal();
+    const couponDisc = calculateCouponDiscount();
+    return Math.max(0, sub - couponDisc - pointsToUse);
+  };
+
   const calculatePointsToEarn = () => Math.floor(calculateTotal() * 0.1);
   const filteredProducts = products.filter(p => p.category === selectedCategory);
   const getStatusColor = (status: string) => status === 'Completed' ? 'bg-green-100 text-green-800 border-green-200' : 'bg-red-100 text-red-800 border-red-200';
@@ -545,7 +598,32 @@ export function AdminDashboard({ onLogout, onNavigateHome }: AdminDashboardProps
             <div className="grid grid-cols-12 gap-6">
               <div className="col-span-2 space-y-2"><h3 className="text-sm text-[#8B5E3C] mb-3 px-2">Kategoriler</h3>{dynamicCategories.map(cat => (<button key={cat.id} onClick={() => setSelectedCategory(cat.id)} className={`w-full text-left px-4 py-3 rounded-xl transition-all text-sm ${selectedCategory === cat.id ? 'bg-[#8B5E3C] text-white' : 'bg-white text-[#8B5E3C] hover:bg-[#E6D3BA] border border-[#E6D3BA]'}`}><div className="flex items-center gap-2"><cat.icon className="w-4 h-4" /><span>{cat.name}</span></div></button>))}</div>
               <div className="col-span-6"><h3 className="text-sm text-[#8B5E3C] mb-3">Ürünler</h3><div className="grid grid-cols-2 gap-4 max-h-[calc(100vh-200px)] overflow-y-auto">{filteredProducts.map(product => (<div key={product.id} className="bg-white border border-[#E6D3BA] p-4 rounded-2xl hover:shadow-lg transition-all"><h4 className="text-[#2D1B12] mb-1 font-bold">{product.name}</h4><p className="text-xs text-[#8B5E3C] mb-3">{product.description}</p><div className="flex flex-wrap gap-2">{product.sizes.map((sizeOption) => (<button key={sizeOption.size} onClick={() => addToOrder(product, sizeOption)} className="flex-1 min-w-[80px] px-3 py-2 bg-[#E6D3BA] hover:bg-[#8B5E3C] text-[#2D1B12] hover:text-white rounded-xl transition-all text-xs font-bold">{product.sizes.length > 1 && <div>{sizeOption.size}</div>} <div>₺{sizeOption.price}</div></button>))}</div></div>))}</div></div>
-              <div className="col-span-4"><div className="bg-white border border-[#E6D3BA] rounded-3xl p-6 sticky top-24"><h3 className="text-xl text-[#2D1B12] mb-4">Sipariş Özeti</h3><div className="mb-4"><label className="text-sm text-[#8B5E3C] mb-2 block">Sadakat Numarası</label><Input value={loyaltyNumber} onChange={(e) => handleLoyaltyNumberChange(e.target.value)} placeholder="LOY12345" className="rounded-xl border-[#C8A27A]" />{customerInfo && (<div className="mt-2 p-3 bg-[#E6D3BA] rounded-xl"><p className="text-sm text-[#2D1B12]">Müşteri: <span className="font-bold">{customerInfo.name}</span></p><p className="text-sm text-[#2D1B12]">Mevcut Puan: <span className="font-bold">{customerInfo.points}</span></p></div>)}</div><div className="mb-4"><label className="text-sm text-[#8B5E3C] mb-2 block">Kupon Kodu</label><Input value={couponCode} onChange={(e) => setCouponCode(e.target.value)} placeholder="WELCOME10" className="rounded-xl border-[#C8A27A]" /></div>{customerInfo && (<div className="mb-4"><label className="text-sm text-[#8B5E3C] mb-2 block">Kullanılacak Puan</label><Input type="number" value={pointsToUse} onChange={(e) => setPointsToUse(Math.min(Number(e.target.value), customerInfo.points))} max={customerInfo.points} className="rounded-xl border-[#C8A27A]" /></div>)}<div className="mb-4 max-h-48 overflow-y-auto border-t border-[#E6D3BA] pt-4">{orderItems.length === 0 ? (<p className="text-sm text-[#8B5E3C] text-center py-4">Sipariş boş</p>) : (<div className="space-y-2">{orderItems.map((item, index) => (<div key={`${item.productId}-${item.size}-${index}`} className="flex items-center justify-between gap-2 p-2 bg-[#FAF8F5] rounded-xl"><div className="flex-1"><p className="text-sm text-[#2D1B12] font-bold">{item.name}</p><p className="text-xs text-[#8B5E3C]">{item.size} - ₺{item.price}</p></div><div className="flex items-center gap-2"><button onClick={() => updateQuantity(item.productId, item.size, item.quantity - 1)} className="w-6 h-6 bg-[#E6D3BA] rounded-full text-[#2D1B12] hover:bg-[#C8A27A]">-</button><span className="text-sm text-[#2D1B12] w-6 text-center font-bold">{item.quantity}</span><button onClick={() => updateQuantity(item.productId, item.size, item.quantity + 1)} className="w-6 h-6 bg-[#E6D3BA] rounded-full text-[#2D1B12] hover:bg-[#C8A27A]">+</button></div><button onClick={() => removeFromOrder(item.productId, item.size)} className="text-red-500 hover:text-red-700"><X className="w-4 h-4" /></button></div>))}</div>)}</div><div className="border-t border-[#E6D3BA] pt-4 space-y-2"><div className="flex justify-between text-sm"><span className="text-[#8B5E3C]">Ara Toplam:</span><span className="text-[#2D1B12] font-bold">₺{calculateSubtotal()}</span></div>{pointsToUse > 0 && (<div className="flex justify-between text-sm"><span className="text-[#8B5E3C]">Puan İndirimi:</span><span className="text-green-600 font-bold">-₺{pointsToUse}</span></div>)}<div className="flex justify-between text-lg border-t border-[#E6D3BA] pt-2"><span className="text-[#2D1B12] font-bold">Toplam:</span><span className="text-[#2D1B12] font-bold">₺{calculateTotal()}</span></div><div className="flex justify-between text-sm text-green-600"><span>Kazanılacak Puan:</span><span className="font-bold">+{calculatePointsToEarn()} puan</span></div></div><Button onClick={createOrder} disabled={orderItems.length === 0} className="w-full mt-4 bg-gradient-to-r from-[#8B5E3C] to-[#8B5E3C] text-white hover:from-[#2D1B12] hover:to-[#2D1B12] rounded-xl py-6">Sipariş Oluştur</Button></div></div>
+              <div className="col-span-4"><div className="bg-white border border-[#E6D3BA] rounded-3xl p-6 sticky top-24"><h3 className="text-xl text-[#2D1B12] mb-4">Sipariş Özeti</h3><div className="mb-4"><label className="text-sm text-[#8B5E3C] mb-2 block">Sadakat Numarası</label><Input value={loyaltyNumber} onChange={(e) => { handleLoyaltyNumberChange(e.target.value); setAppliedCoupon(null); setCouponCode(''); }} placeholder="LOY12345" className="rounded-xl border-[#C8A27A]" />{customerInfo && (<div className="mt-2 p-3 bg-[#E6D3BA] rounded-xl"><p className="text-sm text-[#2D1B12]">Müşteri: <span className="font-bold">{customerInfo.name}</span></p><p className="text-sm text-[#2D1B12]">Mevcut Puan: <span className="font-bold">{customerInfo.points}</span></p></div>)}</div>
+              
+              <div className="mb-4">
+                <label className="text-sm text-[#8B5E3C] mb-2 block">Kupon Kodu</label>
+                <div className="flex gap-2">
+                  <Input value={couponCode} onChange={(e) => setCouponCode(e.target.value)} placeholder="WELCOME10" className="rounded-xl border-[#C8A27A]" disabled={!!appliedCoupon} />
+                  {appliedCoupon ? (
+                    <Button onClick={() => { setAppliedCoupon(null); setCouponCode(''); }} variant="outline" className="border-red-200 text-red-600 hover:bg-red-50 rounded-xl px-3">iptal</Button>
+                  ) : (
+                    <Button onClick={handleValidateCoupon} className="bg-[#8B5E3C] text-white hover:bg-[#2D1B12] rounded-xl px-4">Uygula</Button>
+                  )}
+                </div>
+                {couponError && <p className="text-xs text-red-500 mt-1">{couponError}</p>}
+                {appliedCoupon && <p className="text-xs text-green-600 mt-1 font-bold">Kupon aktif: {appliedCoupon.discountType === 'percent' ? `%${appliedCoupon.discountValue}` : `₺${appliedCoupon.discountValue}`} indirim</p>}
+              </div>
+              
+              {customerInfo && (<div className="mb-4"><label className="text-sm text-[#8B5E3C] mb-2 block">Kullanılacak Puan</label><Input type="number" value={pointsToUse} onChange={(e) => setPointsToUse(Math.min(Number(e.target.value), customerInfo.points))} max={customerInfo.points} className="rounded-xl border-[#C8A27A]" /></div>)}<div className="mb-4 max-h-48 overflow-y-auto border-t border-[#E6D3BA] pt-4">{orderItems.length === 0 ? (<p className="text-sm text-[#8B5E3C] text-center py-4">Sipariş boş</p>) : (<div className="space-y-2">{orderItems.map((item, index) => (<div key={`${item.productId}-${item.size}-${index}`} className="flex items-center justify-between gap-2 p-2 bg-[#FAF8F5] rounded-xl"><div className="flex-1"><p className="text-sm text-[#2D1B12] font-bold">{item.name}</p><p className="text-xs text-[#8B5E3C]">{item.size} - ₺{item.price}</p></div><div className="flex items-center gap-2"><button onClick={() => updateQuantity(item.productId, item.size, item.quantity - 1)} className="w-6 h-6 bg-[#E6D3BA] rounded-full text-[#2D1B12] hover:bg-[#C8A27A]">-</button><span className="text-sm text-[#2D1B12] w-6 text-center font-bold">{item.quantity}</span><button onClick={() => updateQuantity(item.productId, item.size, item.quantity + 1)} className="w-6 h-6 bg-[#E6D3BA] rounded-full text-[#2D1B12] hover:bg-[#C8A27A]">+</button></div><button onClick={() => removeFromOrder(item.productId, item.size)} className="text-red-500 hover:text-red-700"><X className="w-4 h-4" /></button></div>))}</div>)}</div><div className="border-t border-[#E6D3BA] pt-4 space-y-2"><div className="flex justify-between text-sm"><span className="text-[#8B5E3C]">Ara Toplam:</span><span className="text-[#2D1B12] font-bold">₺{calculateSubtotal()}</span></div>
+              
+              {appliedCoupon && (
+                <div className="flex justify-between text-sm">
+                  <span className="text-[#8B5E3C] flex items-center gap-1"><Tag className="w-3 h-3" /> Kupon İndirimi:</span>
+                  <span className="text-green-600 font-bold">-₺{calculateCouponDiscount().toFixed(2)}</span>
+                </div>
+              )}
+              
+              {pointsToUse > 0 && (<div className="flex justify-between text-sm"><span className="text-[#8B5E3C]">Puan İndirimi:</span><span className="text-green-600 font-bold">-₺{pointsToUse}</span></div>)}<div className="flex justify-between text-lg border-t border-[#E6D3BA] pt-2"><span className="text-[#2D1B12] font-bold">Toplam:</span><span className="text-[#2D1B12] font-bold">₺{calculateTotal().toFixed(2)}</span></div><div className="flex justify-between text-sm text-green-600"><span>Kazanılacak Puan:</span><span className="font-bold">+{calculatePointsToEarn()} puan</span></div></div><Button onClick={createOrder} disabled={orderItems.length === 0} className="w-full mt-4 bg-gradient-to-r from-[#8B5E3C] to-[#8B5E3C] text-white hover:from-[#2D1B12] hover:to-[#2D1B12] rounded-xl py-6">Sipariş Oluştur</Button></div></div>
             </div>
           )}
 

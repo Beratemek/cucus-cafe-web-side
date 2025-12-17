@@ -11,6 +11,14 @@ router.post(
   orderController.createOrder
 );
 
+// Validate Coupon (Admin Only)
+router.post(
+  "/validate-coupon",
+  requireAuth,
+  authorizeRoles("admin"),
+  orderController.validateOrderCoupon
+);
+
 // Get All Orders (Admin Only)
 router.get(
   "/",
