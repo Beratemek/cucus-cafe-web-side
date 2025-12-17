@@ -136,7 +136,7 @@ export function ProfilePage({ initialTab = 'login' }: ProfilePageProps) {
         else sessionStorage.setItem('token', data.token);
         
         
-        toast.success("Giriş Başarılı! Hoş geldiniz.");
+        
         fetchCoupons(data.token);
         setUserInfo({
           name: `${data.user.name} ${data.user.surname}`,
