@@ -9,7 +9,7 @@ Bu doküman, backend projesinde Nodemailer email servisinin nasıl yapılandır�
 ```env
 # Email Configuration (Nodemailer)
 EMAIL_HOST=smtp.gmail.com
-EMAIL_PORT=465
+EMAIL_PORT=587
 EMAIL_USER=your-email@gmail.com
 EMAIL_PASS=your-app-specific-password
 
@@ -21,20 +21,21 @@ CLIENT_URL=https://your-domain.com
 
 ### Port Seçenekleri
 
-**Port 465 (SSL/TLS - Önerilen):**
-```env
-EMAIL_PORT=465
-```
-- `secure: true` otomatik olarak ayarlanır
-- Doğrudan SSL/TLS bağlantısı
-- Daha güvenli
-
-**Port 587 (STARTTLS):**
+**Port 587 (STARTTLS - Önerilen):**
 ```env
 EMAIL_PORT=587
 ```
 - `secure: false` otomatik olarak ayarlanır
 - STARTTLS ile güvenli bağlantı
+- Daha yüksek uyumluluk (cloud platformlar için ideal)
+- Gmail ve çoğu email sağlayıcı için önerilen
+
+**Port 465 (SSL/TLS):**
+```env
+EMAIL_PORT=465
+```
+- `secure: true` otomatik olarak ayarlanır
+- Doğrudan SSL/TLS bağlantısı
 - Alternatif seçenek
 
 ### Gmail için App Password Oluşturma
@@ -82,7 +83,7 @@ Render'da environment variables eklerken:
 
 ```
 EMAIL_HOST=smtp.gmail.com
-EMAIL_PORT=465
+EMAIL_PORT=587
 EMAIL_USER=your-email@gmail.com
 EMAIL_PASS=your-app-specific-password
 CLIENT_URL=https://your-frontend-domain.com
