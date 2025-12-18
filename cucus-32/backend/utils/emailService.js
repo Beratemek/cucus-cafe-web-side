@@ -3,30 +3,40 @@ const nodemailer = require('nodemailer');
 const sendEmail = async (options) => {
   try {
     // Environment variables kontrolü
-    if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
+    const requiredVars = ['EMAIL_HOST', 'EMAIL_PORT', 'EMAIL_USER', 'EMAIL_PASS'];
+    const missingVars = requiredVars.filter(varName => !process.env[varName]);
+    
+    if (missingVars.length > 0) {
       console.error('❌ EMAIL CONFIGURATION ERROR:');
-      console.error('   EMAIL_USER:', process.env.EMAIL_USER ? '✓ Set' : '✗ NOT SET');
-      console.error('   EMAIL_PASS:', process.env.EMAIL_PASS ? '✓ Set' : '✗ NOT SET');
-      throw new Error('Email configuration missing. Please set EMAIL_USER and EMAIL_PASS environment variables.');
+      requiredVars.forEach(varName => {
+        console.error(`   ${varName}:`, process.env[varName] ? '✓ Set' : '✗ NOT SET');
+      });
+      throw new Error(`Email configuration missing: ${missingVars.join(', ')}`);
     }
 
+    const emailPort = parseInt(process.env.EMAIL_PORT, 10);
+    
     console.log('📧 Email Service: Attempting to send email...');
     console.log('📧 To:', options.email);
     console.log('📧 Subject:', options.subject);
+    console.log('📧 Using EMAIL_HOST:', process.env.EMAIL_HOST);
+    console.log('📧 Using EMAIL_PORT:', emailPort);
     console.log('📧 Using EMAIL_USER:', process.env.EMAIL_USER);
     console.log('📧 EMAIL_PASS configured:', process.env.EMAIL_PASS ? 'Yes ✓' : 'No ✗');
 
-    // PORT 587 (STARTTLS) - En yüksek uyumluluk modu
+    // Port 465 için secure: true, diğer portlar için false
+    const isSecure = emailPort === 465;
+    
     const transporter = nodemailer.createTransport({
-      host: 'smtp.gmail.com',
-      port: 587,
-      secure: false, // 587 için false OLMALIDIR (STARTTLS kullanır)
+      host: process.env.EMAIL_HOST,
+      port: emailPort,
+      secure: isSecure, // 465 için true, 587 için false (STARTTLS kullanır)
       auth: {
         user: process.env.EMAIL_USER,
         pass: process.env.EMAIL_PASS,
       },
       tls: {
-        ciphers: 'SSLv3',
+        // Canlı sunucuda (Render) sertifika hatası almamak için
         rejectUnauthorized: false
       },
       debug: true,
