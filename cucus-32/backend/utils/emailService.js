@@ -3,7 +3,7 @@ const nodemailer = require('nodemailer');
 const sendEmail = async (options) => {
   try {
     // Environment variables kontrolü
-    const requiredVars = ['EMAIL_HOST', 'EMAIL_PORT', 'EMAIL_USER', 'EMAIL_PASS'];
+    const requiredVars = ['EMAIL_USER', 'EMAIL_PASS'];
     const missingVars = requiredVars.filter(varName => !process.env[varName]);
     
     if (missingVars.length > 0) {
@@ -13,24 +13,16 @@ const sendEmail = async (options) => {
       });
       throw new Error(`Email configuration missing: ${missingVars.join(', ')}`);
     }
-
-    const emailPort = parseInt(process.env.EMAIL_PORT, 10);
     
     console.log('📧 Email Service: Attempting to send email...');
     console.log('📧 To:', options.email);
     console.log('📧 Subject:', options.subject);
-    console.log('📧 Using EMAIL_HOST:', process.env.EMAIL_HOST);
-    console.log('📧 Using EMAIL_PORT:', emailPort);
     console.log('📧 Using EMAIL_USER:', process.env.EMAIL_USER);
     console.log('📧 EMAIL_PASS configured:', process.env.EMAIL_PASS ? 'Yes ✓' : 'No ✗');
 
-    // Port 465 için secure: true, diğer portlar için false
-    const isSecure = emailPort === 465;
-    
+    // Gmail için optimize edilmiş yapılandırma
     const transporter = nodemailer.createTransport({
-      host: process.env.EMAIL_HOST,
-      port: emailPort,
-      secure: isSecure, // 465 için true, 587 için false (STARTTLS kullanır)
+      service: 'gmail',
       auth: {
         user: process.env.EMAIL_USER,
         pass: process.env.EMAIL_PASS,
@@ -40,9 +32,7 @@ const sendEmail = async (options) => {
         rejectUnauthorized: false
       },
       debug: true,
-      logger: true,
-      connectionTimeout: 20000, // 20 saniye
-      socketTimeout: 20000 
+      logger: true
     });
 
     // Verify transporter

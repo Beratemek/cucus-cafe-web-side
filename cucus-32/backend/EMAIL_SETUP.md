@@ -8,14 +8,15 @@ Bu doküman, backend projesinde Nodemailer email servisinin nasıl yapılandır�
 
 ```env
 # Email Configuration (Nodemailer)
-EMAIL_HOST=smtp.gmail.com
-EMAIL_PORT=587
+# Gmail için sadece kullanıcı adı ve şifre gereklidir
 EMAIL_USER=your-email@gmail.com
 EMAIL_PASS=your-app-specific-password
 
 # Client URL (Frontend)
 CLIENT_URL=https://your-domain.com
 ```
+
+**Not:** Nodemailer'ın `service: 'gmail'` parametresi kullanıldığı için `EMAIL_HOST` ve `EMAIL_PORT` ayarlarına gerek yoktur. Gmail SMTP ayarları otomatik olarak yapılandırılır.
 
 ## 🔧 Yapılandırma Detayları
 
@@ -82,12 +83,12 @@ Render'da environment variables eklerken:
 2. Aşağıdaki değişkenleri ekleyin:
 
 ```
-EMAIL_HOST=smtp.gmail.com
-EMAIL_PORT=587
 EMAIL_USER=your-email@gmail.com
 EMAIL_PASS=your-app-specific-password
 CLIENT_URL=https://your-frontend-domain.com
 ```
+
+**Not:** `service: 'gmail'` kullanıldığı için `EMAIL_HOST` ve `EMAIL_PORT` eklemenize gerek yoktur.
 
 ### TLS Sertifika Hatası Önleme
 
