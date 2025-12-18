@@ -31,7 +31,7 @@ const sendEmail = async (options) => {
         to: [
           {
             email: options.email,
-            name: options.name || ''
+            name: options.name || 'Değerli Müşterimiz'
           }
         ],
         subject: options.subject,
