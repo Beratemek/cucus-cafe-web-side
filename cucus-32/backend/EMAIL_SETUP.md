@@ -1,53 +1,79 @@
-# Email Yapılandırması - Nodemailer (Brevo SMTP)
+# Email Yapılandırması - Brevo API (HTTP)
 
-Bu doküman, backend projesinde Nodemailer email servisinin Brevo SMTP ile nasıl yapılandırılacağını açıklar.
+Bu doküman, backend projesinde Brevo API ile email servisinin nasıl yapılandırılacağını açıklar.
+
+**Neden SMTP Değil?** Render gibi cloud platformlarda SMTP protokolü timeout hataları verebilir. Bu nedenle HTTP tabanlı Brevo API kullanıyoruz.
 
 ## 📧 Gerekli Environment Değişkenleri
 
 `.env` dosyanıza aşağıdaki değişkenleri ekleyin:
 
 ```env
-# Email Configuration (Nodemailer - Brevo SMTP)
-EMAIL_HOST=smtp-relay.brevo.com
-EMAIL_PORT=587
-EMAIL_USER=your-brevo-login-email
-EMAIL_PASS=your-brevo-smtp-key
+# Email Configuration (Brevo API - HTTP)
+EMAIL_USER=your-brevo-verified-sender-email
+EMAIL_PASS=your-brevo-api-key
 
 # Client URL (Frontend)
 CLIENT_URL=https://your-domain.com
 ```
 
 **Önemli Notlar:**
-- **EMAIL_USER**: Brevo hesabınıza giriş yaptığınız email adresi
-- **EMAIL_PASS**: Brevo SMTP Key (API Key değil!)
-- **FROM Adresi**: Kodda `emekberat19@gmail.com` kullanılıyor (Brevo'da doğrulanmış sender adresi)
-- Port 587 için `secure: false` (STARTTLS) kullanılır
+- **EMAIL_USER**: Brevo'da doğrulanmış sender email adresi (örn: emekberat19@gmail.com)
+- **EMAIL_PASS**: Brevo API Key (SMTP Key değil, API Key!)
+- **Protokol**: HTTP/HTTPS (SMTP değil)
+- **Timeout yok**: REST API kullanıldığı için Render'da sorunsuz çalışır
 
 ## 🔧 Yapılandırma Detayları
 
-### Brevo SMTP Key Nasıl Alınır?
+### Brevo API Key Nasıl Alınır?
 
 1. Brevo hesabınıza giriş yapın: https://app.brevo.com/
 2. Sağ üst köşeden **Settings** (Ayarlar) → **SMTP & API** sekmesine gidin
-3. **SMTP** bölümünde **Create a new SMTP key** butonuna tıklayın
-4. Key'e bir isim verin (örn: "CuCu's Backend")
-5. Oluşturulan SMTP Key'i kopyalayın ve `EMAIL_PASS` olarak kullanın
-6. **EMAIL_USER** olarak Brevo'ya giriş yaptığınız email adresini kullanın
+3. **API Keys** bölümünde **Create a new API key** butonuna tıklayın
+4. Key'e bir isim verin (örn: "CuCu's Backend API")
+5. **Version**: v3 seçin
+6. Oluşturulan API Key'i kopyalayın ve `EMAIL_PASS` olarak kullanın
 
 **Önemli:** 
-- SMTP Key sadece bir kez gösterilir, mutlaka kaydedin!
-- API Key ile SMTP Key farklıdır, SMTP Key kullanmalısınız
-- FROM adresi olarak Brevo'da doğrulanmış bir sender adresi kullanmalısınız
+- API Key sadece bir kez gösterilir, mutlaka kaydedin!
+- SMTP Key değil, **API Key** kullanmalısınız
+- EMAIL_USER olarak Brevo'da doğrulanmış bir sender email kullanın
 
-### Port Yapılandırması
+### Brevo'da Sender Email Doğrulama
 
-**Port 587 (STARTTLS - Brevo için önerilen):**
-```env
-EMAIL_PORT=587
+1. Brevo Dashboard → **Senders** → **Add a new sender**
+2. Email adresinizi ekleyin (örn: emekberat19@gmail.com)
+3. Doğrulama emailini kontrol edin ve linke tıklayın
+4. Doğrulandıktan sonra bu email'i `EMAIL_USER` olarak kullanabilirsiniz
+
+### Teknik Detaylar
+
+**API Endpoint:**
 ```
-- `secure: false` kullanılır
-- STARTTLS ile güvenli bağlantı
-- Cloud platformlar için ideal
+POST https://api.brevo.com/v3/smtp/email
+```
+
+**Request Headers:**
+```json
+{
+  "accept": "application/json",
+  "api-key": "your-brevo-api-key",
+  "content-type": "application/json"
+}
+```
+
+**Request Body:**
+```json
+{
+  "sender": {
+    "email": "sender@example.com",
+    "name": "Cucu's Coffee"
+  },
+  "to": [{"email": "recipient@example.com"}],
+  "subject": "Email Subject",
+  "htmlContent": "<html>...</html>"
+}
+```
 
 ### Diğer Email Sağlayıcıları
 
@@ -83,18 +109,15 @@ Render'da environment variables eklerken:
 2. Aşağıdaki değişkenleri ekleyin:
 
 ```
-EMAIL_HOST=smtp-relay.brevo.com
-EMAIL_PORT=587
-EMAIL_USER=your-brevo-login-email
-EMAIL_PASS=your-brevo-smtp-key
+EMAIL_USER=your-brevo-verified-sender-email
+EMAIL_PASS=your-brevo-api-key
 CLIENT_URL=https://your-frontend-domain.com
 ```
 
-**Önemli:** FROM adresi kodda sabit olarak `emekberat19@gmail.com` kullanılıyor. Bu adresin Brevo hesabınızda doğrulanmış olduğundan emin olun.
-
-### TLS Sertifika Hatası Önleme
-
-Kodda zaten `rejectUnauthorized: false` ayarı mevcut. Bu, Render gibi cloud platformlarda sertifika doğrulama hatalarını önler.
+**Önemli:** 
+- HTTP API kullanıldığı için SMTP timeout sorunu yaşanmaz
+- EMAIL_PASS olarak API Key (SMTP Key değil) kullanın
+- EMAIL_USER Brevo'da doğrulanmış sender email olmalı
 
 ## 📝 Email Şablonları
 
@@ -122,20 +145,21 @@ await sendEmail({
 
 ## ⚠️ Önemli Notlar
 
-1. **Gmail Günlük Limit**: Gmail ücretsiz hesaplar günde 500 email gönderebilir
-2. **App Password**: Normal şifrenizi değil, App Password kullanın
-3. **2FA Zorunlu**: Gmail App Password için 2 Adımlı Doğrulama aktif olmalı
+1. **Brevo Günlük Limit**: Ücretsiz plan günde 300 email gönderebilir
+2. **API Key**: SMTP Key değil, API Key kullanın
+3. **Sender Doğrulama**: EMAIL_USER Brevo'da doğrulanmış olmalı
 4. **CLIENT_URL**: Production'da mutlaka gerçek domain'inizi kullanın
 5. **Güvenlik**: `.env` dosyasını asla Git'e commit etmeyin (`.gitignore`'da olmalı)
+6. **HTTP API**: SMTP timeout sorunu yaşanmaz, Render'da sorunsuz çalışır
 
 ## 🔍 Hata Ayıklama
 
 Email gönderiminde sorun yaşarsanız:
 
-1. **Console logları kontrol edin**: Detaylı hata mesajları görüntülenir
-2. **SMTP bağlantısını test edin**: `transporter.verify()` otomatik çalışır
-3. **Environment değişkenlerini kontrol edin**: Tüm değişkenler doğru mu?
-4. **Gmail güvenlik ayarları**: "Daha az güvenli uygulamalar" kapalı olmalı, App Password kullanın
+1. **Console logları kontrol edin**: Detaylı hata mesajları ve Brevo API yanıtları görüntülenir
+2. **API Key'i kontrol edin**: Doğru API Key kullanıyor musunuz?
+3. **Sender email doğrulandı mı**: Brevo'da sender email doğrulanmış olmalı
+4. **Environment değişkenlerini kontrol edin**: EMAIL_USER ve EMAIL_PASS doğru mu?
 
 ## 📚 İlgili Dosyalar
 
