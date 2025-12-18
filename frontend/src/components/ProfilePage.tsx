@@ -135,8 +135,14 @@ export function ProfilePage({ initialTab = 'login' }: ProfilePageProps) {
         if (rememberMe) localStorage.setItem('token', data.token);
         else sessionStorage.setItem('token', data.token);
         
+        // Admin kontrolü - Admin ise direkt admin paneline yönlendir
+        if (data.user.role === 'admin') {
+          navigate('/admin');
+          window.location.reload();
+          return;
+        }
         
-        
+        // Normal kullanıcı girişi
         fetchCoupons(data.token);
         setUserInfo({
           name: `${data.user.name} ${data.user.surname}`,
@@ -443,8 +449,18 @@ export function ProfilePage({ initialTab = 'login' }: ProfilePageProps) {
               {authView === 'tabs' && (
                 <Tabs defaultValue={initialTab} className="w-full">
                   <TabsList className="grid w-full grid-cols-2 mb-8 bg-white border border-[#E6D3BA] p-1.5 rounded-full shadow-sm">
-                    <TabsTrigger value="login" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-[#8B5E3C] data-[state=active]:to-[#8B5E3C] data-[state=active]:text-white text-[#8B5E3C] rounded-full">Giriş Yap</TabsTrigger>
-                    <TabsTrigger value="register" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-[#8B5E3C] data-[state=active]:to-[#8B5E3C] data-[state=active]:text-white text-[#8B5E3C] rounded-full">Kayıt Ol</TabsTrigger>
+                    <TabsTrigger 
+                      value="login" 
+                      className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-[#8B5E3C] data-[state=active]:to-[#8B5E3C] data-[state=active]:text-white text-[#8B5E3C] rounded-full transition-all duration-300 hover:bg-[#E6D3BA]/50"
+                    >
+                      Giriş Yap
+                    </TabsTrigger>
+                    <TabsTrigger 
+                      value="register" 
+                      className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-[#8B5E3C] data-[state=active]:to-[#8B5E3C] data-[state=active]:text-white text-[#8B5E3C] rounded-full transition-all duration-300 hover:bg-[#E6D3BA]/50"
+                    >
+                      Kayıt Ol
+                    </TabsTrigger>
                   </TabsList>
 
                   <TabsContent value="login">
@@ -452,18 +468,59 @@ export function ProfilePage({ initialTab = 'login' }: ProfilePageProps) {
                       <form onSubmit={handleLogin} className="space-y-6">
                         <div className="space-y-2">
                           <Label htmlFor="login-email" className="text-[#2D1B12]">E-posta Adresi</Label>
-                          <div className="relative"><Mail className="absolute left-3 top-3 h-5 w-5 text-[#C8A27A]" /><Input id="login-email" type="email" placeholder="ornek@email.com" value={loginEmail} onChange={(e) => setLoginEmail(e.target.value)} className="pl-11 bg-[#FAF8F5] border-[#E6D3BA] text-[#2D1B12] placeholder:text-[#C8A27A] focus:border-[#8B5E3C] focus:ring-[#C8A27A] rounded-2xl" required /></div>
+                          <div className="relative">
+                            <Mail className="absolute left-3 top-3 h-5 w-5 text-[#C8A27A] transition-colors" />
+                            <Input 
+                              id="login-email" 
+                              type="email" 
+                              placeholder="ornek@email.com" 
+                              value={loginEmail} 
+                              onChange={(e) => setLoginEmail(e.target.value)} 
+                              className="pl-11 bg-[#FAF8F5] border-[#E6D3BA] text-[#2D1B12] placeholder:text-[#C8A27A] focus:border-[#8B5E3C] focus:ring-[#C8A27A] rounded-2xl transition-all duration-200 hover:border-[#C8A27A]" 
+                              required 
+                            />
+                          </div>
                         </div>
                         <div className="space-y-2">
                           <Label htmlFor="login-password" className="text-[#2D1B12]">Şifre</Label>
-                          <div className="relative"><Lock className="absolute left-3 top-3 h-5 w-5 text-[#C8A27A]" /><Input id="login-password" type="password" placeholder="••••••••" value={loginPassword} onChange={(e) => setLoginPassword(e.target.value)} className="pl-11 bg-[#FAF8F5] border-[#E6D3BA] text-[#2D1B12] placeholder:text-[#C8A27A] focus:border-[#8B5E3C] focus:ring-[#C8A27A] rounded-2xl" required /></div>
+                          <div className="relative">
+                            <Lock className="absolute left-3 top-3 h-5 w-5 text-[#C8A27A] transition-colors" />
+                            <Input 
+                              id="login-password" 
+                              type="password" 
+                              placeholder="••••••••" 
+                              value={loginPassword} 
+                              onChange={(e) => setLoginPassword(e.target.value)} 
+                              className="pl-11 bg-[#FAF8F5] border-[#E6D3BA] text-[#2D1B12] placeholder:text-[#C8A27A] focus:border-[#8B5E3C] focus:ring-[#C8A27A] rounded-2xl transition-all duration-200 hover:border-[#C8A27A]" 
+                              required 
+                            />
+                          </div>
                         </div>
                         <div className="flex items-center justify-between text-sm">
-                          <label className="flex items-center gap-2 cursor-pointer text-[#8B5E3C]"><input type="checkbox" checked={rememberMe} onChange={(e) => setRememberMe(e.target.checked)} className="rounded border-[#C8A27A] text-[#8B5E3C] focus:ring-[#C8A27A]" /><span>Beni hatırla</span></label>
+                          <label className="flex items-center gap-2 cursor-pointer text-[#8B5E3C] hover:text-[#2D1B12] transition-colors">
+                            <input 
+                              type="checkbox" 
+                              checked={rememberMe} 
+                              onChange={(e) => setRememberMe(e.target.checked)} 
+                              className="rounded border-[#C8A27A] text-[#8B5E3C] focus:ring-[#C8A27A] transition-all" 
+                            />
+                            <span>Beni hatırla</span>
+                          </label>
                           {/* ŞİFREMİ UNUTTUM BUTONU - Ayrı sayfaya yönlendir */}
-                          <button type="button" onClick={() => navigate('/forgot-password')} className="text-[#8B5E3C] hover:text-[#2D1B12] font-semibold">Şifremi unuttum</button>
+                          <button 
+                            type="button" 
+                            onClick={() => navigate('/forgot-password')} 
+                            className="text-[#8B5E3C] hover:text-[#2D1B12] font-semibold transition-colors hover:underline"
+                          >
+                            Şifremi unuttum
+                          </button>
                         </div>
-                        <Button type="submit" className="w-full bg-gradient-to-r from-[#8B5E3C] to-[#8B5E3C] hover:from-[#2D1B12] hover:to-[#2D1B12] text-white border-0 rounded-full shadow-md">Giriş Yap</Button>
+                        <Button 
+                          type="submit" 
+                          className="w-full bg-gradient-to-r from-[#8B5E3C] to-[#8B5E3C] hover:from-[#2D1B12] hover:to-[#2D1B12] text-white border-0 rounded-full shadow-md hover:shadow-xl transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] py-6 text-base font-semibold"
+                        >
+                          Giriş Yap
+                        </Button>
                       </form>
                     </div>
                   </TabsContent>
@@ -476,7 +533,12 @@ export function ProfilePage({ initialTab = 'login' }: ProfilePageProps) {
                         <div className="space-y-2"><Label htmlFor="register-phone" className="text-[#2D1B12]">Telefon Numarası</Label><div className="relative"><Phone className="absolute left-3 top-3 h-5 w-5 text-[#C8A27A]" /><Input id="register-phone" type="tel" placeholder="05555555555" value={registerPhone} onChange={(e) => { const onlyNums = e.target.value.replace(/[^0-9]/g, ''); setRegisterPhone(onlyNums); }} className="pl-11 bg-[#FAF8F5] border-[#E6D3BA] text-[#2D1B12] placeholder:text-[#C8A27A] focus:border-[#8B5E3C] focus:ring-[#C8A27A] rounded-2xl" required /></div></div>
                         <div className="space-y-2"><Label htmlFor="register-password" className="text-[#2D1B12]">Şifre</Label><div className="relative"><Lock className="absolute left-3 top-3 h-5 w-5 text-[#C8A27A]" /><Input id="register-password" type="password" placeholder="••••••••" value={registerPassword} onChange={(e) => setRegisterPassword(e.target.value)} className="pl-11 bg-[#FAF8F5] border-[#E6D3BA] text-[#2D1B12] placeholder:text-[#C8A27A] focus:border-[#8B5E3C] focus:ring-[#C8A27A] rounded-2xl" required /></div><p className="text-xs text-[#C8A27A]">Şifreniz en az 8 karakter olmalıdır</p></div>
                         <div className="flex items-start gap-2"><input type="checkbox" required className="mt-1 rounded border-[#C8A27A] text-[#8B5E3C] focus:ring-[#C8A27A]" /><label className="text-sm text-[#8B5E3C]"><a href="#" className="text-[#8B5E3C] hover:text-[#2D1B12]">Kullanım koşullarını</a> ve <a href="#" className="text-[#8B5E3C] hover:text-[#2D1B12]">gizlilik politikasını</a> okudum ve kabul ediyorum.</label></div>
-                        <Button type="submit" className="w-full bg-gradient-to-r from-[#8B5E3C] to-[#8B5E3C] hover:from-[#2D1B12] hover:to-[#2D1B12] text-white border-0 rounded-full shadow-md">Kayıt Ol</Button>
+                        <Button 
+                          type="submit" 
+                          className="w-full bg-gradient-to-r from-[#8B5E3C] to-[#8B5E3C] hover:from-[#2D1B12] hover:to-[#2D1B12] text-white border-0 rounded-full shadow-md hover:shadow-xl transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] py-6 text-base font-semibold"
+                        >
+                          Kayıt Ol
+                        </Button>
                       </form>
                     </div>
                   </TabsContent>

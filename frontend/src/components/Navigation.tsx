@@ -6,9 +6,10 @@ interface NavigationProps {
   currentPage: 'home' | 'menu' | 'campaigns' | 'profile' | 'contact';
   onNavigate: (page: 'home' | 'menu' | 'campaigns' | 'profile' | 'contact') => void;
   onAdminClick: () => void;
+  isAdmin?: boolean;
 }
 
-export function Navigation({ currentPage, onNavigate, onAdminClick }: NavigationProps) {
+export function Navigation({ currentPage, onNavigate, onAdminClick, isAdmin = false }: NavigationProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const navItems = [
@@ -55,14 +56,16 @@ export function Navigation({ currentPage, onNavigate, onAdminClick }: Navigation
               );
             })}
             
-            {/* Admin Link */}
-            <button
-              onClick={onAdminClick}
-              className="ml-2 p-2 text-[#8B5E3C] hover:text-[#2D1B12] hover:bg-[#E6D3BA] rounded-full transition-all duration-200 group"
-              title="Yönetici Girişi"
-            >
-              <Shield className="w-5 h-5 group-hover:scale-110 transition-transform" />
-            </button>
+            {/* Admin Link - Only visible for admin users */}
+            {isAdmin && (
+              <button
+                onClick={onAdminClick}
+                className="ml-2 p-2 text-[#8B5E3C] hover:text-[#2D1B12] hover:bg-[#E6D3BA] rounded-full transition-all duration-200 group"
+                title="Yönetici Girişi"
+              >
+                <Shield className="w-5 h-5 group-hover:scale-110 transition-transform" />
+              </button>
+            )}
           </div>
 
           {/* Mobile Menu Button */}
@@ -99,17 +102,19 @@ export function Navigation({ currentPage, onNavigate, onAdminClick }: Navigation
               );
             })}
             
-            {/* Admin Link - Mobile */}
-            <button
-              onClick={() => {
-                onAdminClick();
-                setMobileMenuOpen(false);
-              }}
-              className="flex items-center gap-2 py-3 px-4 text-base text-[#8B5E3C] hover:text-[#2D1B12] hover:bg-[#E6D3BA] transition-colors rounded-xl mt-2 border-t border-[#E6D3BA] pt-4 w-full"
-            >
-              <Shield className="w-5 h-5" />
-              Yönetici Girişi
-            </button>
+            {/* Admin Link - Mobile - Only visible for admin users */}
+            {isAdmin && (
+              <button
+                onClick={() => {
+                  onAdminClick();
+                  setMobileMenuOpen(false);
+                }}
+                className="flex items-center gap-2 py-3 px-4 text-base text-[#8B5E3C] hover:text-[#2D1B12] hover:bg-[#E6D3BA] transition-colors rounded-xl mt-2 border-t border-[#E6D3BA] pt-4 w-full"
+              >
+                <Shield className="w-5 h-5" />
+                Yönetici Girişi
+              </button>
+            )}
           </div>
         )}
       </div>

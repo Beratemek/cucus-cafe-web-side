@@ -41,16 +41,15 @@ export function AdminLoginPage({ onLogin, onBack }: AdminLoginPageProps) {
       if (response.ok) {
         if (data.user.role === 'admin') {
           
-          // 2. Logic Kısmı (Burada da sorun yoktu)
+          // Token'ı kaydet
           if (rememberMe) {
-            // Beni Hatırla SEÇİLİ: LocalStorage (Kalıcı)
             localStorage.setItem('token', data.token);
           } else {
-            // Beni Hatırla SEÇİLİ DEĞİL: SessionStorage (Geçici)
             sessionStorage.setItem('token', data.token);
           }
           
-          onLogin(); 
+          onLogin();
+          window.location.reload(); // Sayfayı yenile
         } else {
           alert("Giriş başarılı ancak bu panele erişim yetkiniz yok!");
         }

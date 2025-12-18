@@ -14,7 +14,7 @@ import { VerifyEmailPage } from './components/VerifyEmailPage';
 import { API_URL } from './config';
 import { Toaster } from 'sonner';
 
-function MainLayout({ children }: { children: React.ReactNode }) {
+function MainLayout({ children, isAdmin }: { children: React.ReactNode; isAdmin: boolean }) {
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -34,6 +34,7 @@ function MainLayout({ children }: { children: React.ReactNode }) {
         currentPage={getCurrentPage()} 
         onNavigate={(page) => navigate(page === 'home' ? '/' : `/${page}`)}
         onAdminClick={() => navigate('/admin')}
+        isAdmin={isAdmin}
       />
       <Toaster richColors />
       {children}
@@ -104,7 +105,7 @@ export default function App() {
   return (
     <Routes>
       <Route path="/" element={
-        <MainLayout>
+        <MainLayout isAdmin={isAdminLoggedIn}>
           <HomePage 
             onNavigate={(page) => navigate(page === 'home' ? '/' : `/${page}`)} 
             onNavigateToRegister={() => {
@@ -115,10 +116,10 @@ export default function App() {
         </MainLayout>
       } />
       
-      <Route path="/menu" element={<MainLayout><MenuPage /></MainLayout>} />
-      <Route path="/campaigns" element={<MainLayout><CampaignsPage /></MainLayout>} />
-      <Route path="/profile" element={<MainLayout><ProfilePage initialTab={profileInitialTab} /></MainLayout>} />
-      <Route path="/contact" element={<MainLayout><ContactPage /></MainLayout>} />
+      <Route path="/menu" element={<MainLayout isAdmin={isAdminLoggedIn}><MenuPage /></MainLayout>} />
+      <Route path="/campaigns" element={<MainLayout isAdmin={isAdminLoggedIn}><CampaignsPage /></MainLayout>} />
+      <Route path="/profile" element={<MainLayout isAdmin={isAdminLoggedIn}><ProfilePage initialTab={profileInitialTab} /></MainLayout>} />
+      <Route path="/contact" element={<MainLayout isAdmin={isAdminLoggedIn}><ContactPage /></MainLayout>} />
       
       {/* Auth Routes */}
       <Route path="/forgot-password" element={<ForgotPasswordPage />} />
