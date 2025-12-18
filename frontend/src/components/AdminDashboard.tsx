@@ -459,7 +459,7 @@ export function AdminDashboard({ onLogout, onNavigateHome }: AdminDashboardProps
       });
       const data = await response.json();
       if (response.ok) {
-        setCustomerHistory(data.history || []);
+        setCustomerHistory((data.history || []).reverse());
       }
     } catch (error) {
       console.error("Geçmiş çekilemedi:", error);
