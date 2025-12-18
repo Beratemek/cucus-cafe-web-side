@@ -1,53 +1,53 @@
-# Email Yapılandırması - Nodemailer
+# Email Yapılandırması - Nodemailer (Brevo SMTP)
 
-Bu doküman, backend projesinde Nodemailer email servisinin nasıl yapılandırılacağını açıklar.
+Bu doküman, backend projesinde Nodemailer email servisinin Brevo SMTP ile nasıl yapılandırılacağını açıklar.
 
 ## 📧 Gerekli Environment Değişkenleri
 
 `.env` dosyanıza aşağıdaki değişkenleri ekleyin:
 
 ```env
-# Email Configuration (Nodemailer)
-# Gmail için sadece kullanıcı adı ve şifre gereklidir
-EMAIL_USER=your-email@gmail.com
-EMAIL_PASS=your-app-specific-password
+# Email Configuration (Nodemailer - Brevo SMTP)
+EMAIL_HOST=smtp-relay.brevo.com
+EMAIL_PORT=587
+EMAIL_USER=your-brevo-login-email
+EMAIL_PASS=your-brevo-smtp-key
 
 # Client URL (Frontend)
 CLIENT_URL=https://your-domain.com
 ```
 
-**Not:** Nodemailer'ın `service: 'gmail'` parametresi kullanıldığı için `EMAIL_HOST` ve `EMAIL_PORT` ayarlarına gerek yoktur. Gmail SMTP ayarları otomatik olarak yapılandırılır.
+**Önemli Notlar:**
+- **EMAIL_USER**: Brevo hesabınıza giriş yaptığınız email adresi
+- **EMAIL_PASS**: Brevo SMTP Key (API Key değil!)
+- **FROM Adresi**: Kodda `emekberat19@gmail.com` kullanılıyor (Brevo'da doğrulanmış sender adresi)
+- Port 587 için `secure: false` (STARTTLS) kullanılır
 
 ## 🔧 Yapılandırma Detayları
 
-### Port Seçenekleri
+### Brevo SMTP Key Nasıl Alınır?
 
-**Port 587 (STARTTLS - Önerilen):**
+1. Brevo hesabınıza giriş yapın: https://app.brevo.com/
+2. Sağ üst köşeden **Settings** (Ayarlar) → **SMTP & API** sekmesine gidin
+3. **SMTP** bölümünde **Create a new SMTP key** butonuna tıklayın
+4. Key'e bir isim verin (örn: "CuCu's Backend")
+5. Oluşturulan SMTP Key'i kopyalayın ve `EMAIL_PASS` olarak kullanın
+6. **EMAIL_USER** olarak Brevo'ya giriş yaptığınız email adresini kullanın
+
+**Önemli:** 
+- SMTP Key sadece bir kez gösterilir, mutlaka kaydedin!
+- API Key ile SMTP Key farklıdır, SMTP Key kullanmalısınız
+- FROM adresi olarak Brevo'da doğrulanmış bir sender adresi kullanmalısınız
+
+### Port Yapılandırması
+
+**Port 587 (STARTTLS - Brevo için önerilen):**
 ```env
 EMAIL_PORT=587
 ```
-- `secure: false` otomatik olarak ayarlanır
+- `secure: false` kullanılır
 - STARTTLS ile güvenli bağlantı
-- Daha yüksek uyumluluk (cloud platformlar için ideal)
-- Gmail ve çoğu email sağlayıcı için önerilen
-
-**Port 465 (SSL/TLS):**
-```env
-EMAIL_PORT=465
-```
-- `secure: true` otomatik olarak ayarlanır
-- Doğrudan SSL/TLS bağlantısı
-- Alternatif seçenek
-
-### Gmail için App Password Oluşturma
-
-1. Google Hesabınıza gidin: https://myaccount.google.com/
-2. **Güvenlik** sekmesine tıklayın
-3. **2 Adımlı Doğrulama**'yı aktif edin (zorunlu)
-4. **Uygulama Şifreleri** (App Passwords) bölümüne gidin
-5. Uygulama seçin: **Mail**
-6. Cihaz seçin: **Diğer** (özel ad girin, örn: "CuCu's Backend")
-7. Oluşturulan 16 haneli şifreyi `EMAIL_PASS` olarak kullanın
+- Cloud platformlar için ideal
 
 ### Diğer Email Sağlayıcıları
 
@@ -83,12 +83,14 @@ Render'da environment variables eklerken:
 2. Aşağıdaki değişkenleri ekleyin:
 
 ```
-EMAIL_USER=your-email@gmail.com
-EMAIL_PASS=your-app-specific-password
+EMAIL_HOST=smtp-relay.brevo.com
+EMAIL_PORT=587
+EMAIL_USER=your-brevo-login-email
+EMAIL_PASS=your-brevo-smtp-key
 CLIENT_URL=https://your-frontend-domain.com
 ```
 
-**Not:** `service: 'gmail'` kullanıldığı için `EMAIL_HOST` ve `EMAIL_PORT` eklemenize gerek yoktur.
+**Önemli:** FROM adresi kodda sabit olarak `emekberat19@gmail.com` kullanılıyor. Bu adresin Brevo hesabınızda doğrulanmış olduğundan emin olun.
 
 ### TLS Sertifika Hatası Önleme
 

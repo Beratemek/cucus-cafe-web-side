@@ -3,7 +3,7 @@ const nodemailer = require('nodemailer');
 const sendEmail = async (options) => {
   try {
     // Environment variables kontrolü
-    const requiredVars = ['EMAIL_USER', 'EMAIL_PASS'];
+    const requiredVars = ['EMAIL_HOST', 'EMAIL_PORT', 'EMAIL_USER', 'EMAIL_PASS'];
     const missingVars = requiredVars.filter(varName => !process.env[varName]);
     
     if (missingVars.length > 0) {
@@ -13,22 +13,27 @@ const sendEmail = async (options) => {
       });
       throw new Error(`Email configuration missing: ${missingVars.join(', ')}`);
     }
+
+    const emailPort = parseInt(process.env.EMAIL_PORT, 10);
     
     console.log('📧 Email Service: Attempting to send email...');
     console.log('📧 To:', options.email);
     console.log('📧 Subject:', options.subject);
+    console.log('📧 Using EMAIL_HOST:', process.env.EMAIL_HOST);
+    console.log('📧 Using EMAIL_PORT:', emailPort);
     console.log('📧 Using EMAIL_USER:', process.env.EMAIL_USER);
     console.log('📧 EMAIL_PASS configured:', process.env.EMAIL_PASS ? 'Yes ✓' : 'No ✗');
 
-    // Gmail için optimize edilmiş yapılandırma
+    // Brevo SMTP yapılandırması
     const transporter = nodemailer.createTransport({
-      service: 'gmail',
+      host: process.env.EMAIL_HOST,
+      port: emailPort,
+      secure: false, // Port 587 için false (STARTTLS kullanır)
       auth: {
         user: process.env.EMAIL_USER,
         pass: process.env.EMAIL_PASS,
       },
       tls: {
-        // Canlı sunucuda (Render) sertifika hatası almamak için
         rejectUnauthorized: false
       },
       debug: true,
@@ -40,7 +45,7 @@ const sendEmail = async (options) => {
     console.log('📧 SMTP connection verified ✓');
 
     const mailOptions = {
-      from: `"CuCu's Coffee & Cake - Destek" <${process.env.EMAIL_USER}>`,
+      from: `"CuCu's Coffee & Cake - Destek" <emekberat19@gmail.com>`,
       to: options.email,
       subject: options.subject,
       html: options.html,
