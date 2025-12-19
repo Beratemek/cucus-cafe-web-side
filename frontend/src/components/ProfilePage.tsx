@@ -434,10 +434,10 @@ export function ProfilePage({ initialTab = 'login' }: ProfilePageProps) {
                       {(coupon.validCategories && coupon.validCategories.length > 0) || (coupon.validSizes && coupon.validSizes.length > 0) ? (
                         <div className="mt-3 pt-3 border-t border-[#E6D3BA] text-xs bg-amber-50 p-2 rounded-lg space-y-1">
                           {coupon.validCategories && coupon.validCategories.length > 0 && (
-                            <p className="text-amber-800 font-semibold">📍 Sadece espresso bazlı kahvelerde</p>
+                            <p className="text-amber-800 font-semibold">📍 Sadece Standart Kahvelerde</p>
                           )}
                           {coupon.validSizes && coupon.validSizes.length > 0 && (
-                            <p className="text-amber-800 font-semibold">📏 Sadece {coupon.validSizes.join(", ")} boyutunda</p>
+                            <p className="text-amber-800 font-semibold">📏 Sadece {coupon.validSizes.join(", ")} Boy Kahvelerde</p>
                           )}
                         </div>
                       ) : null}
