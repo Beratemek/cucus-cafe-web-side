@@ -52,7 +52,7 @@ exports.register = async (req, res) => {
 
     // Doğrulama Maili Gönder
     const verificationUrl = `${process.env.CLIENT_URL || 'https://cucus.online'}/verify-email.html?token=${verificationToken}`;
-    
+
     const userName = `${newUser.name} ${newUser.surname}`;
     const htmlContent = emailVerificationEmail(verificationUrl, userName);
 
@@ -223,12 +223,12 @@ exports.forgotPassword = async (req, res) => {
     console.error("❌ Forgot Password Error:", error.message);
     console.error("   Error name:", error.name);
     console.error("   Stack:", error.stack);
-    
+
     // MongoDB connection error özel mesajı
     if (error.name === 'MongooseServerSelectionError' || error.message.includes('buffering timed out')) {
       return res.status(500).json({ message: "Veritabanı bağlantı hatası. Lütfen daha sonra tekrar deneyin." });
     }
-    
+
     return res.status(500).json({ message: "Sunucu Hatası!" });
   }
 };
@@ -274,27 +274,82 @@ exports.resetPassword = async (req, res) => {
 
 // Email Doğrulama İşlemi
 exports.verifyEmail = async (req, res) => {
-    try {
-        const { token } = req.body; // veya req.query.token (ama genelde front-end body ile atar POST requestte)
-        
-        const u = await user.findOne({
-            verificationToken: token,
-            verificationTokenExpires: { $gt: Date.now() }
-        });
+  try {
+    const { token } = req.body; // veya req.query.token (ama genelde front-end body ile atar POST requestte)
 
-        if (!u) {
-            return res.status(400).json({ message: "Geçersiz veya süresi dolmuş doğrulama linki." });
-        }
+    const u = await user.findOne({
+      verificationToken: token,
+      verificationTokenExpires: { $gt: Date.now() }
+    });
 
-        u.isVerified = true;
-        u.verificationToken = undefined;
-        u.verificationTokenExpires = undefined;
-        await u.save();
-
-        res.status(200).json({ message: "Email başarıyla doğrulandı!" });
-
-    } catch (error) {
-        console.error("Verification Error:", error);
-        res.status(500).json({ message: "Sunucu hatası." });
+    if (!u) {
+      return res.status(400).json({ message: "Geçersiz veya süresi dolmuş doğrulama linki." });
     }
+
+    u.isVerified = true;
+    u.verificationToken = undefined;
+    u.verificationTokenExpires = undefined;
+    await u.save();
+
+    res.status(200).json({ message: "Email başarıyla doğrulandı!" });
+
+  } catch (error) {
+    console.error("Verification Error:", error);
+    res.status(500).json({ message: "Sunucu hatası." });
+  }
+};
+
+// Puanları Kupona Dönüştürme
+exports.convertPointsToCoupon = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const currentUser = await user.findById(userId);
+
+    if (!currentUser) {
+      return res.status(404).json({ message: "Kullanıcı bulunamadı." });
+    }
+
+    if (currentUser.loyalty.points < 500) {
+      return res.status(400).json({ message: "Yetersiz puan. En az 500 puanınız olmalı." });
+    }
+
+    // Puan düş
+    currentUser.loyalty.points -= 500;
+    currentUser.loyalty.history.push({
+      amount: 500,
+      type: "spend",
+      description: "500 Puan -> %100 İndirim Kuponu"
+    });
+
+    // Kupon oluştur
+    // Format: 500P-RND-TIMESTAMP
+    const couponCode = `500P-${Math.floor(1000 + Math.random() * 9000)}-${Date.now().toString().slice(-6)}`;
+
+    const newCoupon = {
+      code: couponCode,
+      discountType: "percent",
+      discountValue: 100,
+      expiryDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 gün geçerli
+      isUsed: false,
+      earnedFrom: "points_conversion",
+      // Sadece standart ve küçük boy kahvelerde geçerli
+      // Admin panelindeki diğer kategorilerde (cakes, hot-beverages vb.) geçerli olmamalı
+      // Bu yüzden sadece kahve kategorilerini ekliyoruz.
+      validCategories: ["standard-coffee", "iced-coffees"],
+      validSizes: ["Standart", "Küçük"]
+    };
+
+    currentUser.coupons.push(newCoupon);
+    await currentUser.save();
+
+    res.status(200).json({
+      message: "Puanlarınız başarıyla kupona dönüştürüldü.",
+      coupon: newCoupon,
+      currentPoints: currentUser.loyalty.points
+    });
+
+  } catch (error) {
+    console.error("Puan dönüştürme hatası:", error);
+    res.status(500).json({ message: "Sunucu hatası." });
+  }
 };

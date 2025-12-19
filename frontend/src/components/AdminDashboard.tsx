@@ -390,13 +390,23 @@ export function AdminDashboard({ onLogout, onNavigateHome }: AdminDashboardProps
       setCouponError("Önce müşteri seçin ve kupon kodu girin.");
       return;
     }
+
+    if (orderItems.length === 0) {
+      setCouponError("Sepet boşken kupon uygulanamaz. Lütfen önce ürün ekleyin.");
+      return;
+    }
+
     setCouponError('');
     try {
       const token = localStorage.getItem('token') || sessionStorage.getItem('token');
       const response = await fetch(`${API_URL}/orders/validate-coupon`, {
         method: "POST",
         headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
-        body: JSON.stringify({ loyaltyNo: loyaltyNumber, couponCode })
+        body: JSON.stringify({
+          loyaltyNo: loyaltyNumber,
+          couponCode,
+          items: orderItems.map(item => ({ product: item.productId, quantity: item.quantity, selectedSize: item.size }))
+        })
       });
       const data = await response.json();
 
@@ -407,7 +417,6 @@ export function AdminDashboard({ onLogout, onNavigateHome }: AdminDashboardProps
           discountValue: data.coupon.discountValue
         });
         setCouponError('');
-        alert(`Kupon uygulandı: %${data.coupon.discountType === 'percent' ? data.coupon.discountValue : `₺${data.coupon.discountValue} İndirim`}`);
       } else {
         setAppliedCoupon(null);
         setCouponError(data.message || "Geçersiz kupon.");

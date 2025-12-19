@@ -68,30 +68,54 @@ exports.createOrder = async (req, res) => {
       if (coupon.isUsed) return res.status(400).json({ message: "Bu kupon zaten kullanılmış!" });
       if (new Date(coupon.expiryDate) < new Date()) return res.status(400).json({ message: "Kuponun süresi dolmuş!" });
 
-      // Kategori kısıtlaması kontrolü
+      // DEBUG: Kupon objektesini tam göster
+      console.log('\n💾 KUPON OBJESİ:');
+      console.log('   Code:', coupon.code);
+      console.log('   validCategories:', coupon.validCategories);
+      console.log('   validSizes:', coupon.validSizes);
+      console.log('   discountValue:', coupon.discountValue);
+
+      // Kategori kısıtlaması kontrolü - ZORUNLU
       if (coupon.validCategories && coupon.validCategories.length > 0) {
+        console.log('🔍 KATEGORİ KONTROLÜ - validCategories:', coupon.validCategories);
+
         const isValidForOrder = await Promise.all(
           orderItems.map(async (item) => {
             const product = await Product.findById(item.product);
-            return product && coupon.validCategories.includes(product.category);
+            const valid = product && coupon.validCategories.includes(product.category);
+            console.log(`   ✓ Ürün: ${product?.name} (${product?.category}) => ${valid ? '✅' : '❌'}`);
+            return valid;
           })
         );
 
-        if (!isValidForOrder.every(v => v)) {
+        const allValid = isValidForOrder.every(v => v);
+        console.log(`   📊 Kategori Sonuç: ${allValid ? '✅ PASS' : '❌ FAIL'}`);
+
+        if (!allValid) {
+          console.log('   ⛔ Kategoride hata - sipariş reddediliyor');
           return res.status(400).json({ message: "Bu kupon, siparişinizdeki bazı ürünlerde geçerli değil. Sadece espresso bazlı kahvelerde kullanabilirsiniz." });
         }
       }
 
-      // Boy kısıtlaması kontrolü
+      // Boy kısıtlaması kontrolü - ZORUNLU
       if (coupon.validSizes && coupon.validSizes.length > 0) {
+        console.log('📏 BOY KONTROLÜ - validSizes:', coupon.validSizes);
+
         const isValidSizeForOrder = orderItems.every(item => {
-          return coupon.validSizes.includes(item.selectedSize);
+          const valid = coupon.validSizes.includes(item.selectedSize);
+          console.log(`   ✓ Boy: "${item.selectedSize}" => ${valid ? '✅' : '❌'}`);
+          return valid;
         });
 
+        console.log(`   📊 Boy Sonuç: ${isValidSizeForOrder ? '✅ PASS' : '❌ FAIL'}`);
+
         if (!isValidSizeForOrder) {
+          console.log('   ⛔ Boyda hata - sipariş reddediliyor');
           return res.status(400).json({ message: "Bu kupon, seçilen ürün boyutlarında geçerli değil. Lütfen Küçük boy seçiniz." });
         }
       }
+
+      console.log('✅ ✅ TÜM KONTROLLER BAŞARILI - İNDİRİM UYGULANACAK\n');
 
       // İndirim hesaplama (Yüzde veya Tutar)
       if (coupon.discountType === 'amount') {
@@ -158,7 +182,7 @@ exports.createOrder = async (req, res) => {
 // Kupon Doğrulama (Admin için)
 exports.validateOrderCoupon = async (req, res) => {
   try {
-    const { loyaltyNo, couponCode } = req.body;
+    const { loyaltyNo, couponCode, items } = req.body;
 
     if (!loyaltyNo || !couponCode) {
       return res.status(400).json({ message: "Sadakat no ve kupon kodu gereklidir." });
@@ -181,6 +205,41 @@ exports.validateOrderCoupon = async (req, res) => {
 
     if (new Date(coupon.expiryDate) < new Date()) {
       return res.status(400).json({ valid: false, message: "Kuponun süresi dolmuş!" });
+    }
+
+    // --- KATEGORİ VE BOYUT KONTROLÜ (Eğer sepet gönderildiyse) ---
+    if (items && items.length > 0) {
+      // Kategori kontrolü
+      if (coupon.validCategories && coupon.validCategories.length > 0) {
+        const isValidForOrder = await Promise.all(
+          items.map(async (item) => {
+            const product = await Product.findById(item.product);
+            return product && coupon.validCategories.includes(product.category);
+          })
+        );
+
+        if (!isValidForOrder.every(v => v)) {
+          return res.status(400).json({
+            valid: false,
+            message: "Bu kupon, sepetteki bazı ürünlerde geçerli değil. (Kategori uyuşmazlığı)"
+          });
+        }
+      }
+
+      // Boyut kontrolü
+      if (coupon.validSizes && coupon.validSizes.length > 0) {
+        const isValidSizeForOrder = items.every(item => {
+          // item.selectedSize frontend'den gelmeli
+          return item.selectedSize && coupon.validSizes.includes(item.selectedSize);
+        });
+
+        if (!isValidSizeForOrder) {
+          return res.status(400).json({
+            valid: false,
+            message: "Bu kupon, seçilen ürün boyutlarında geçerli değil. (Boyut uyuşmazlığı)"
+          });
+        }
+      }
     }
 
     return res.status(200).json({

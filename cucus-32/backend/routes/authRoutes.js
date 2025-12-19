@@ -23,4 +23,7 @@ router.post("/reset-password", authController.resetPassword);
 // Email doğrulama
 router.post("/verify-email", authController.verifyEmail);
 
+// Puan dönüştürme
+router.post("/convert-points", requireAuth, authController.convertPointsToCoupon);
+
 module.exports = router;
