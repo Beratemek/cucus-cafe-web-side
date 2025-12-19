@@ -52,9 +52,9 @@ exports.spinWheel = async (req, res) => {
                 const remainingTime = oneDay - diff;
                 const hours = Math.floor(remainingTime / (1000 * 60 * 60));
                 const minutes = Math.floor((remainingTime % (1000 * 60 * 60)) / (1000 * 60));
-                
-                return res.status(403).json({ 
-                    message: `Günde sadece 1 kez çevirebilirsin. Kalan süre: ${hours} saat ${minutes} dakika.` 
+
+                return res.status(403).json({
+                    message: `Günde sadece 1 kez çevirebilirsin. Kalan süre: ${hours} saat ${minutes} dakika.`
                 });
             }
         }
@@ -302,7 +302,9 @@ exports.convertPointsToCoupon = async (req, res) => {
             discountValue: 100, // %100 indirim
             expiryDate,
             isUsed: false,
-            earnedFrom: "loyalty_conversion"
+            earnedFrom: "loyalty_conversion",
+            validCategories: ["standard-coffee"], // Sadece Standart Kahveler
+            validSizes: ["Küçük"] // Sadece Küçük boy
         };
 
         user.coupons.push(newCoupon);

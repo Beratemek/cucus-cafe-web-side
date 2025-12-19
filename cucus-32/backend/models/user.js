@@ -16,6 +16,8 @@ const couponSchema = new mongoose.Schema({
     expiryDate: { type: Date, required: true },
     isUsed: { type: Boolean, default: false },
     earnedFrom: { type: String, default: "wheel" },
+    validCategories: { type: [String], default: null },
+    validSizes: { type: [String], default: null },
     createdAt: { type: Date, default: Date.now }
 });
 
@@ -52,25 +54,27 @@ const userSchema = new mongoose.Schema(
         lastWheelSpin: { type: Date },
 
         coupons: [
-          {
-            code: { type: String, required: true },
-            discountType: { type: String, enum: ["percent", "amount"], default: "percent" },
-            discountValue: { type: Number, required: true }, // Örn: 10 (%10)
-            expiryDate: { type: Date, required: true },
-            isUsed: { type: Boolean, default: false },
-            earnedFrom: { type: String, default: "wheel" }
-          }
-       ],
+            {
+                code: { type: String, required: true },
+                discountType: { type: String, enum: ["percent", "amount"], default: "percent" },
+                discountValue: { type: Number, required: true }, // Örn: 10 (%10)
+                expiryDate: { type: Date, required: true },
+                isUsed: { type: Boolean, default: false },
+                earnedFrom: { type: String, default: "wheel" },
+                validCategories: { type: [String], default: null },
+                validSizes: { type: [String], default: null }
+            }
+        ],
 
         // Spin History
         wheelSpins: [
-          {
-            date: { type: Date, default: Date.now },
-            reward: { type: String },
-            rewardValue: { type: mongoose.Schema.Types.Mixed }
-         }
+            {
+                date: { type: Date, default: Date.now },
+                reward: { type: String },
+                rewardValue: { type: mongoose.Schema.Types.Mixed }
+            }
         ],
-        
+
         // Email Verification
         isVerified: { type: Boolean, default: false },
         verificationToken: { type: String },

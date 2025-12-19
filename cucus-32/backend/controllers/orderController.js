@@ -23,10 +23,10 @@ exports.createOrder = async (req, res) => {
       if (!product) return res.status(404).json({ message: "Ürün bulunamadı" });
 
       // --- YENİ MANTIK: BOYUTA GÖRE FİYAT BULMA ---
-      
+
       // 1. Ürünün sizes dizisi var mı kontrol et
       if (!product.sizes || product.sizes.length === 0) {
-         return res.status(400).json({ message: `${product.name} için fiyat bilgisi bulunamadı.` });
+        return res.status(400).json({ message: `${product.name} için fiyat bilgisi bulunamadı.` });
       }
 
       // 2. İstenen boyutu bul (Eğer frontend boyut göndermezse varsayılan olarak ilkini alabiliriz)
@@ -68,17 +68,42 @@ exports.createOrder = async (req, res) => {
       if (coupon.isUsed) return res.status(400).json({ message: "Bu kupon zaten kullanılmış!" });
       if (new Date(coupon.expiryDate) < new Date()) return res.status(400).json({ message: "Kuponun süresi dolmuş!" });
 
+      // Kategori kısıtlaması kontrolü
+      if (coupon.validCategories && coupon.validCategories.length > 0) {
+        const isValidForOrder = await Promise.all(
+          orderItems.map(async (item) => {
+            const product = await Product.findById(item.product);
+            return product && coupon.validCategories.includes(product.category);
+          })
+        );
+
+        if (!isValidForOrder.every(v => v)) {
+          return res.status(400).json({ message: "Bu kupon, siparişinizdeki bazı ürünlerde geçerli değil. Sadece espresso bazlı kahvelerde kullanabilirsiniz." });
+        }
+      }
+
+      // Boy kısıtlaması kontrolü
+      if (coupon.validSizes && coupon.validSizes.length > 0) {
+        const isValidSizeForOrder = orderItems.every(item => {
+          return coupon.validSizes.includes(item.selectedSize);
+        });
+
+        if (!isValidSizeForOrder) {
+          return res.status(400).json({ message: "Bu kupon, seçilen ürün boyutlarında geçerli değil. Lütfen Küçük boy seçiniz." });
+        }
+      }
+
       // İndirim hesaplama (Yüzde veya Tutar)
       if (coupon.discountType === 'amount') {
-          discount = coupon.discountValue;
+        discount = coupon.discountValue;
       } else {
-          // Varsayılan: Yüzde
-          discount = (total * coupon.discountValue) / 100;
+        // Varsayılan: Yüzde
+        discount = (total * coupon.discountValue) / 100;
       }
 
       // İndirim toplam tutardan fazla olamaz
       if (discount > total) {
-          discount = total;
+        discount = total;
       }
 
       total -= discount;
@@ -132,47 +157,47 @@ exports.createOrder = async (req, res) => {
 
 // Kupon Doğrulama (Admin için)
 exports.validateOrderCoupon = async (req, res) => {
-    try {
-        const { loyaltyNo, couponCode } = req.body;
+  try {
+    const { loyaltyNo, couponCode } = req.body;
 
-        if (!loyaltyNo || !couponCode) {
-            return res.status(400).json({ message: "Sadakat no ve kupon kodu gereklidir." });
-        }
-
-        const user = await User.findOne({ "loyalty.sadakat_no": loyaltyNo });
-        if (!user) {
-            return res.status(404).json({ message: "Müşteri bulunamadı." });
-        }
-
-        const coupon = user.coupons.find(c => c.code === couponCode);
-
-        if (!coupon) {
-            return res.status(404).json({ valid: false, message: "Kupon bulunamadı!" });
-        }
-
-        if (coupon.isUsed) {
-            return res.status(400).json({ valid: false, message: "Kupon zaten kullanılmış!" });
-        }
-
-        if (new Date(coupon.expiryDate) < new Date()) {
-            return res.status(400).json({ valid: false, message: "Kuponun süresi dolmuş!" });
-        }
-
-        return res.status(200).json({
-            valid: true,
-            message: "Kupon geçerli!",
-            coupon: {
-                code: coupon.code,
-                discountType: coupon.discountType,
-                discountValue: coupon.discountValue,
-                earnedFrom: coupon.earnedFrom
-            }
-        });
-
-    } catch (error) {
-        console.error("Valudate Order Coupon Error:", error);
-        return res.status(500).json({ message: "Sunucu hatası!" });
+    if (!loyaltyNo || !couponCode) {
+      return res.status(400).json({ message: "Sadakat no ve kupon kodu gereklidir." });
     }
+
+    const user = await User.findOne({ "loyalty.sadakat_no": loyaltyNo });
+    if (!user) {
+      return res.status(404).json({ message: "Müşteri bulunamadı." });
+    }
+
+    const coupon = user.coupons.find(c => c.code === couponCode);
+
+    if (!coupon) {
+      return res.status(404).json({ valid: false, message: "Kupon bulunamadı!" });
+    }
+
+    if (coupon.isUsed) {
+      return res.status(400).json({ valid: false, message: "Kupon zaten kullanılmış!" });
+    }
+
+    if (new Date(coupon.expiryDate) < new Date()) {
+      return res.status(400).json({ valid: false, message: "Kuponun süresi dolmuş!" });
+    }
+
+    return res.status(200).json({
+      valid: true,
+      message: "Kupon geçerli!",
+      coupon: {
+        code: coupon.code,
+        discountType: coupon.discountType,
+        discountValue: coupon.discountValue,
+        earnedFrom: coupon.earnedFrom
+      }
+    });
+
+  } catch (error) {
+    console.error("Valudate Order Coupon Error:", error);
+    return res.status(500).json({ message: "Sunucu hatası!" });
+  }
 };
 
 // Tüm siparişleri listeleme (Admin)
