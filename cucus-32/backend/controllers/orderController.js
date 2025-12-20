@@ -1,15 +1,31 @@
 const Order = require("../models/order");
 const User = require("../models/user");
 const Product = require("../models/product");
+const Campaign = require("../models/campaign");
+const fs = require('fs'); // Added for debugging
 
 exports.createOrder = async (req, res) => {
   try {
     // Frontend'den artık items içinde "selectedSize" da gelmeli!
     // Örn: items: [{ product: "ID...", quantity: 1, selectedSize: "Büyük Boy" }]
+    // Örn: items: [{ product: "ID...", quantity: 1, selectedSize: "Büyük Boy" }]
     const { loyaltyNo, items, pointsUsed, couponCode } = req.body;
 
+    // File logging for reliable debugging
+    try {
+      fs.writeFileSync('C:/Users/Fatih/cucus-cafe-web-side/ORDER_DEBUG.txt', `Time: ${new Date().toISOString()}\nLoyaltyNo: ${loyaltyNo} (Type: ${typeof loyaltyNo})\n`, { flag: 'a' });
+    } catch (logErr) {
+      console.error("Log error:", logErr);
+    }
+
+    console.log(`Searching for user with loyaltyNo: ${loyaltyNo} (Type: ${typeof loyaltyNo})`); // DEBUG
+
     const user = await User.findOne({ "loyalty.sadakat_no": loyaltyNo });
-    if (!user) return res.status(404).json({ message: "Kullanıcı bulunamadı (Sadakat No hatalı)" });
+
+    if (!user) {
+      console.log("User not found via DB query."); // DEBUG
+      return res.status(404).json({ message: "Kullanıcı bulunamadı (Sadakat No hatalı)" });
+    }
 
     let total = 0;
     const orderItems = [];
@@ -23,10 +39,10 @@ exports.createOrder = async (req, res) => {
       if (!product) return res.status(404).json({ message: "Ürün bulunamadı" });
 
       // --- YENİ MANTIK: BOYUTA GÖRE FİYAT BULMA ---
-      
+
       // 1. Ürünün sizes dizisi var mı kontrol et
       if (!product.sizes || product.sizes.length === 0) {
-         return res.status(400).json({ message: `${product.name} için fiyat bilgisi bulunamadı.` });
+        return res.status(400).json({ message: `${product.name} için fiyat bilgisi bulunamadı.` });
       }
 
       // 2. İstenen boyutu bul (Eğer frontend boyut göndermezse varsayılan olarak ilkini alabiliriz)
@@ -62,28 +78,72 @@ exports.createOrder = async (req, res) => {
     let couponCodeUsed = null;
 
     if (couponCode) {
-      const coupon = user.coupons.find(c => c.code === couponCode);
+      console.log("Checking coupon:", couponCode); // DEBUG LOG
+      // 1. Önce kullanıcının kendi kuponlarına bak
+      let coupon = user.coupons.find(c => c.code === couponCode);
+      let isGlobalCampaign = false;
+
+      // 2. Eğer kullanıcıda yoksa, Genel Kampanyalara bak
+      if (!coupon) {
+        console.log("User coupon not found. Searching global campaigns..."); // DEBUG LOG
+        const campaign = await Campaign.findOne({ couponCode: couponCode });
+        console.log("Campaign found:", campaign ? campaign.title : "NULL"); // DEBUG LOG
+
+        if (campaign) {
+          // Kampanya validasyonları
+          if (!campaign.isActive) return res.status(400).json({ message: "Bu kampanya aktif değil!" });
+          if (new Date(campaign.endDate) < new Date()) return res.status(400).json({ message: "Kampanya kodu süresi dolmuş!" });
+
+          const isUsed = campaign.usedBy.includes(user._id);
+          if (isUsed) return res.status(400).json({ message: "Bu kampanya kodunu zaten kullandınız!" });
+
+          // Geçici bir kupon objesi oluştur (Logic aynı kalsın diye)
+          coupon = {
+            code: campaign.couponCode,
+            discountType: campaign.discountType,
+            discountValue: campaign.discountValue,
+            isUsed: false // Henüz kullanılmadı (aşağıda işlenecek)
+          };
+          isGlobalCampaign = true;
+        }
+      }
 
       if (!coupon) return res.status(400).json({ message: "Geçersiz kupon kodu!" });
-      if (coupon.isUsed) return res.status(400).json({ message: "Bu kupon zaten kullanılmış!" });
-      if (new Date(coupon.expiryDate) < new Date()) return res.status(400).json({ message: "Kuponun süresi dolmuş!" });
+      if (!isGlobalCampaign && coupon.isUsed) return res.status(400).json({ message: "Bu kupon zaten kullanılmış!" });
+      if (!isGlobalCampaign && new Date(coupon.expiryDate) < new Date()) return res.status(400).json({ message: "Kuponun süresi dolmuş!" });
 
       // İndirim hesaplama (Yüzde veya Tutar)
       if (coupon.discountType === 'amount') {
-          discount = coupon.discountValue;
+        discount = coupon.discountValue;
       } else {
-          // Varsayılan: Yüzde
-          discount = (total * coupon.discountValue) / 100;
+        // Varsayılan: Yüzde
+        discount = (total * coupon.discountValue) / 100;
       }
 
       // İndirim toplam tutardan fazla olamaz
       if (discount > total) {
-          discount = total;
+        discount = total;
       }
 
       total -= discount;
       couponCodeUsed = couponCode;
-      coupon.isUsed = true;
+
+      // Kullanıldı işaretle
+      if (isGlobalCampaign) {
+        // Global kampanya ise usedBy dizisine ekle
+        await Campaign.findOneAndUpdate(
+          { couponCode: couponCode },
+          { $push: { usedBy: user._id } }
+        );
+      } else {
+        // Kişisel kupon ise isUsed true yap
+        // Not: coupon objesi user.coupons referansı olduğu için doğrudan değişebilir ama save gerekir.
+        // user.coupons.find ile bulduğumuz referans üzerinden değişiklik yapıyoruz.
+        const userCouponIndex = user.coupons.findIndex(c => c.code === couponCode);
+        if (userCouponIndex !== -1) {
+          user.coupons[userCouponIndex].isUsed = true;
+        }
+      }
     }
 
     // --- PUAN KULLANIMI ---
@@ -132,47 +192,73 @@ exports.createOrder = async (req, res) => {
 
 // Kupon Doğrulama (Admin için)
 exports.validateOrderCoupon = async (req, res) => {
-    try {
-        const { loyaltyNo, couponCode } = req.body;
+  try {
+    const { loyaltyNo, couponCode } = req.body;
 
-        if (!loyaltyNo || !couponCode) {
-            return res.status(400).json({ message: "Sadakat no ve kupon kodu gereklidir." });
-        }
-
-        const user = await User.findOne({ "loyalty.sadakat_no": loyaltyNo });
-        if (!user) {
-            return res.status(404).json({ message: "Müşteri bulunamadı." });
-        }
-
-        const coupon = user.coupons.find(c => c.code === couponCode);
-
-        if (!coupon) {
-            return res.status(404).json({ valid: false, message: "Kupon bulunamadı!" });
-        }
-
-        if (coupon.isUsed) {
-            return res.status(400).json({ valid: false, message: "Kupon zaten kullanılmış!" });
-        }
-
-        if (new Date(coupon.expiryDate) < new Date()) {
-            return res.status(400).json({ valid: false, message: "Kuponun süresi dolmuş!" });
-        }
-
-        return res.status(200).json({
-            valid: true,
-            message: "Kupon geçerli!",
-            coupon: {
-                code: coupon.code,
-                discountType: coupon.discountType,
-                discountValue: coupon.discountValue,
-                earnedFrom: coupon.earnedFrom
-            }
-        });
-
-    } catch (error) {
-        console.error("Valudate Order Coupon Error:", error);
-        return res.status(500).json({ message: "Sunucu hatası!" });
+    if (!loyaltyNo || !couponCode) {
+      return res.status(400).json({ message: "Sadakat no ve kupon kodu gereklidir." });
     }
+
+    const user = await User.findOne({ "loyalty.sadakat_no": loyaltyNo });
+    if (!user) {
+      return res.status(404).json({ message: "Müşteri bulunamadı." });
+    }
+
+    // 1. Önce kullanıcının kendi kuponlarına bak
+    let coupon = user.coupons.find(c => c.code === couponCode);
+    let isGlobalCampaign = false;
+
+    // 2. Eğer kullanıcıda yoksa, Genel Kampanyalara bak
+    if (!coupon) {
+      const campaign = await Campaign.findOne({ couponCode: couponCode });
+
+      if (campaign) {
+        // Kampanya validasyonları
+        if (!campaign.isActive) return res.status(400).json({ valid: false, message: "Bu kampanya aktif değil!" });
+        if (new Date(campaign.endDate) < new Date()) return res.status(400).json({ valid: false, message: "Kampanya kodu süresi dolmuş!" });
+
+        const isUsed = campaign.usedBy.includes(user._id);
+        if (isUsed) return res.status(400).json({ valid: false, message: "Bu kampanya kodunu zaten kullandınız!" });
+
+        // Geçici bir kupon objesi oluştur (Logic aynı kalsın diye)
+        coupon = {
+          code: campaign.couponCode,
+          discountType: campaign.discountType,
+          discountValue: campaign.discountValue,
+          isUsed: false,
+          earnedFrom: "Kampanya"
+        };
+        isGlobalCampaign = true;
+      }
+    }
+
+    if (!coupon) {
+      return res.status(404).json({ valid: false, message: "Kupon bulunamadı!" });
+    }
+
+    if (!isGlobalCampaign && coupon.isUsed) {
+      return res.status(400).json({ valid: false, message: "Kupon zaten kullanılmış!" });
+    }
+
+    if (!isGlobalCampaign && new Date(coupon.expiryDate) < new Date()) {
+      return res.status(400).json({ valid: false, message: "Kuponun süresi dolmuş!" });
+    }
+
+    return res.status(200).json({
+      valid: true,
+      message: "Kupon geçerli!",
+      coupon: {
+        code: coupon.code,
+        discountType: coupon.discountType,
+        discountValue: coupon.discountValue,
+        earnedFrom: coupon.earnedFrom
+      }
+    });
+
+  } catch (error) {
+    console.error("Valudate Order Coupon Error:", error);
+    return res.status(500).json({ message: "Sunucu hatası!" });
+  }
 };
 
 // Tüm siparişleri listeleme (Admin)

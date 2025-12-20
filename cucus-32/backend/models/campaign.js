@@ -14,11 +14,12 @@ const campaignSchema = new mongoose.Schema(
     endDate: { type: Date, required: true },
     isActive: { type: Boolean, default: true },
     image: { type: String }, // Kampanya görseli için opsiyonel alan
-    couponCode: { 
-      type: String, 
-      unique: true, 
+    couponCode: {
+      type: String,
+      unique: true,
       sparse: true // Allows null/undefined values while maintaining uniqueness
     },
+    usedBy: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }], // Kampanya kodunu kullanan kullanıcılar
   },
   { timestamps: true }
 );

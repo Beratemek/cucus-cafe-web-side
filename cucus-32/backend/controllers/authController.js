@@ -4,6 +4,7 @@ const jwt = require('jsonwebtoken');
 const generateLoyaltyNumber = require('../utils/sadakatNoGenerator');
 const sendEmail = require('../utils/emailService');
 const crypto = require('crypto');
+const fs = require('fs'); // Added for debugging
 const { passwordResetEmail, emailVerificationEmail } = require('../utils/emailTemplates');
 
 //Yeni Kullanıcı Kaydı
@@ -52,7 +53,7 @@ exports.register = async (req, res) => {
 
     // Doğrulama Maili Gönder
     const verificationUrl = `${process.env.CLIENT_URL || 'https://cucus.online'}/verify-email.html?token=${verificationToken}`;
-    
+
     const userName = `${newUser.name} ${newUser.surname}`;
     const htmlContent = emailVerificationEmail(verificationUrl, userName);
 
@@ -89,6 +90,7 @@ exports.register = async (req, res) => {
 //Kullanıcı Girişi Yapma
 exports.login = async (req, res) => {
   try {
+    fs.writeFileSync('C:/Users/Fatih/cucus-cafe-web-side/DEBUG_START.txt', `Login attempt at ${new Date().toISOString()}\n`);
     //Alan Kontrolü
     const { email, password } = req.body;
     if (!email || !password) {
@@ -126,7 +128,8 @@ exports.login = async (req, res) => {
       token
     });
   } catch (error) {
-    console.error("Login Error Details:", error); // console.error kullanımı
+    console.error("Login Error Details:", error);
+    fs.writeFileSync('C:/Users/Fatih/cucus-cafe-web-side/DEBUG_ERROR.txt', `Time: ${new Date().toISOString()}\nError: ${error.message}\nStack: ${error.stack}\n\n`, { flag: 'a' });
     return res.status(500).json({ message: "Sunucu Hatası!", error: error.message }); // Hata detayını frontend'e dön (geçici olarak)
   }
 };
@@ -223,12 +226,12 @@ exports.forgotPassword = async (req, res) => {
     console.error("❌ Forgot Password Error:", error.message);
     console.error("   Error name:", error.name);
     console.error("   Stack:", error.stack);
-    
+
     // MongoDB connection error özel mesajı
     if (error.name === 'MongooseServerSelectionError' || error.message.includes('buffering timed out')) {
       return res.status(500).json({ message: "Veritabanı bağlantı hatası. Lütfen daha sonra tekrar deneyin." });
     }
-    
+
     return res.status(500).json({ message: "Sunucu Hatası!" });
   }
 };
@@ -274,27 +277,27 @@ exports.resetPassword = async (req, res) => {
 
 // Email Doğrulama İşlemi
 exports.verifyEmail = async (req, res) => {
-    try {
-        const { token } = req.body; // veya req.query.token (ama genelde front-end body ile atar POST requestte)
-        
-        const u = await user.findOne({
-            verificationToken: token,
-            verificationTokenExpires: { $gt: Date.now() }
-        });
+  try {
+    const { token } = req.body; // veya req.query.token (ama genelde front-end body ile atar POST requestte)
 
-        if (!u) {
-            return res.status(400).json({ message: "Geçersiz veya süresi dolmuş doğrulama linki." });
-        }
+    const u = await user.findOne({
+      verificationToken: token,
+      verificationTokenExpires: { $gt: Date.now() }
+    });
 
-        u.isVerified = true;
-        u.verificationToken = undefined;
-        u.verificationTokenExpires = undefined;
-        await u.save();
-
-        res.status(200).json({ message: "Email başarıyla doğrulandı!" });
-
-    } catch (error) {
-        console.error("Verification Error:", error);
-        res.status(500).json({ message: "Sunucu hatası." });
+    if (!u) {
+      return res.status(400).json({ message: "Geçersiz veya süresi dolmuş doğrulama linki." });
     }
+
+    u.isVerified = true;
+    u.verificationToken = undefined;
+    u.verificationTokenExpires = undefined;
+    await u.save();
+
+    res.status(200).json({ message: "Email başarıyla doğrulandı!" });
+
+  } catch (error) {
+    console.error("Verification Error:", error);
+    res.status(500).json({ message: "Sunucu hatası." });
+  }
 };
