@@ -2,7 +2,7 @@ import { Badge } from './ui/badge';
 import { Clock, Percent, Gift, Calendar, Sparkles, Zap, Coffee } from 'lucide-react';
 import { API_URL } from '../config';
 // Eğer 'motion/react' hata vermeye devam ederse burayı 'framer-motion' olarak değiştirmeyi dene
-import { motion } from 'motion/react'; 
+import { motion } from 'motion/react';
 import { useEffect, useState } from 'react';
 
 // Backendden gelen veri tipi
@@ -14,6 +14,7 @@ interface CampaignData {
   discountValue: number;
   endDate: string;
   isActive: boolean;
+  couponCode?: string;
 }
 
 export function CampaignsPage() {
@@ -71,11 +72,11 @@ export function CampaignsPage() {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 lg:py-20">
-        
+
         {loading ? (
           <div className="text-center text-[#8B5E3C]">Yükleniyor...</div>
         ) : campaigns.length === 0 ? (
-           <div className="text-center text-[#8B5E3C]">Aktif kampanya bulunamadı.</div>
+          <div className="text-center text-[#8B5E3C]">Aktif kampanya bulunamadı.</div>
         ) : (
           /* Kampanyalar */
           <div className="mb-16">
@@ -87,11 +88,11 @@ export function CampaignsPage() {
               {campaigns.map((campaign, index) => {
                 // HATA 1 ÇÖZÜMÜ: icon property'si yoktu, fonksiyonu çağırdık.
                 const Icon = getIconForCampaign(campaign.title);
-                
+
                 return (
                   <motion.div
                     // HATA 2 ÇÖZÜMÜ: id yerine _id kullandık
-                    key={campaign._id} 
+                    key={campaign._id}
                     initial={{ opacity: 0, y: 20 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.5, delay: index * 0.05 }}
@@ -112,11 +113,20 @@ export function CampaignsPage() {
                           <Icon className="w-6 h-6 text-[#8B5E3C]" />
                         </div>
                       </div>
-                      
+
                       <p className="text-[#8B5E3C] mb-6 leading-relaxed text-sm min-h-[60px]">
                         {campaign.description || "Kampanya detayları için mağazamıza bekleriz."}
                       </p>
-                      
+
+                      {campaign.couponCode && (
+                        <div className="mb-4 bg-[#F5EFE6] border border-[#E6D3BA] rounded-xl p-3 text-center">
+                          <p className="text-xs text-[#8B5E3C] mb-1 uppercase tracking-wider">Kampanya Kodu</p>
+                          <p className="text-xl font-mono font-bold text-[#2D1B12] tracking-widest select-all">
+                            {campaign.couponCode}
+                          </p>
+                        </div>
+                      )}
+
                       <div className="flex items-center gap-2 text-sm text-[#C8A27A]">
                         <Calendar className="w-4 h-4 text-[#8B5E3C]" />
                         {/* HATA 4 ÇÖZÜMÜ: validUntil yerine endDate ve format fonksiyonunu kullandık */}

@@ -1,0 +1,2 @@
+Time: 2025-12-20T10:02:18.845Z
+LoyaltyNo: 413001 (Type: string)

@@ -13,4 +13,8 @@ router.put("/:id", requireAuth, authorizeRoles("admin"), campaignController.upda
 router.delete("/:id", requireAuth, authorizeRoles("admin"), campaignController.deleteCampaign);
 router.patch("/:id/toggle", requireAuth, authorizeRoles("admin"), campaignController.toggleCampaignStatus);
 
+// Kullanıcı işlemleri (Giriş yapmış kullanıcılar)
+router.post("/verify-code", requireAuth, campaignController.validateCampaignCode);
+router.post("/apply-code", requireAuth, campaignController.applyCampaignCode);
+
 module.exports = router;

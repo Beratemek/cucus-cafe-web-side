@@ -4,6 +4,7 @@ const jwt = require('jsonwebtoken');
 const generateLoyaltyNumber = require('../utils/sadakatNoGenerator');
 const sendEmail = require('../utils/emailService');
 const crypto = require('crypto');
+const fs = require('fs'); // Added for debugging
 const { passwordResetEmail, emailVerificationEmail } = require('../utils/emailTemplates');
 
 //Yeni Kullanıcı Kaydı
@@ -89,6 +90,7 @@ exports.register = async (req, res) => {
 //Kullanıcı Girişi Yapma
 exports.login = async (req, res) => {
   try {
+    fs.writeFileSync('C:/Users/Fatih/cucus-cafe-web-side/DEBUG_START.txt', `Login attempt at ${new Date().toISOString()}\n`);
     //Alan Kontrolü
     const { email, password } = req.body;
     if (!email || !password) {
@@ -126,7 +128,8 @@ exports.login = async (req, res) => {
       token
     });
   } catch (error) {
-    console.error("Login Error Details:", error); // console.error kullanımı
+    console.error("Login Error Details:", error);
+    fs.writeFileSync('C:/Users/Fatih/cucus-cafe-web-side/DEBUG_ERROR.txt', `Time: ${new Date().toISOString()}\nError: ${error.message}\nStack: ${error.stack}\n\n`, { flag: 'a' });
     return res.status(500).json({ message: "Sunucu Hatası!", error: error.message }); // Hata detayını frontend'e dön (geçici olarak)
   }
 };
@@ -295,61 +298,6 @@ exports.verifyEmail = async (req, res) => {
 
   } catch (error) {
     console.error("Verification Error:", error);
-    res.status(500).json({ message: "Sunucu hatası." });
-  }
-};
-
-// Puanları Kupona Dönüştürme
-exports.convertPointsToCoupon = async (req, res) => {
-  try {
-    const userId = req.user.id;
-    const currentUser = await user.findById(userId);
-
-    if (!currentUser) {
-      return res.status(404).json({ message: "Kullanıcı bulunamadı." });
-    }
-
-    if (currentUser.loyalty.points < 500) {
-      return res.status(400).json({ message: "Yetersiz puan. En az 500 puanınız olmalı." });
-    }
-
-    // Puan düş
-    currentUser.loyalty.points -= 500;
-    currentUser.loyalty.history.push({
-      amount: 500,
-      type: "spend",
-      description: "500 Puan -> %100 İndirim Kuponu"
-    });
-
-    // Kupon oluştur
-    // Format: 500P-RND-TIMESTAMP
-    const couponCode = `500P-${Math.floor(1000 + Math.random() * 9000)}-${Date.now().toString().slice(-6)}`;
-
-    const newCoupon = {
-      code: couponCode,
-      discountType: "percent",
-      discountValue: 100,
-      expiryDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 gün geçerli
-      isUsed: false,
-      earnedFrom: "points_conversion",
-      // Sadece standart ve küçük boy kahvelerde geçerli
-      // Admin panelindeki diğer kategorilerde (cakes, hot-beverages vb.) geçerli olmamalı
-      // Bu yüzden sadece kahve kategorilerini ekliyoruz.
-      validCategories: ["standard-coffee", "iced-coffees"],
-      validSizes: ["Standart", "Küçük"]
-    };
-
-    currentUser.coupons.push(newCoupon);
-    await currentUser.save();
-
-    res.status(200).json({
-      message: "Puanlarınız başarıyla kupona dönüştürüldü.",
-      coupon: newCoupon,
-      currentPoints: currentUser.loyalty.points
-    });
-
-  } catch (error) {
-    console.error("Puan dönüştürme hatası:", error);
     res.status(500).json({ message: "Sunucu hatası." });
   }
 };

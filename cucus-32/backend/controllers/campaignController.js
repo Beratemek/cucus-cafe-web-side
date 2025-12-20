@@ -1,12 +1,45 @@
 const Campaign = require("../models/campaign");
 
+// Rastgele kısa kod üretme fonksiyonu (6 karakterli)
+const generateShortCode = async () => {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    let code = '';
+    let isUnique = false;
+
+    while (!isUnique) {
+        code = '';
+        for (let i = 0; i < 6; i++) {
+            code += chars.charAt(Math.floor(Math.random() * chars.length));
+        }
+
+        // Veritabanında var mı kontrol et
+        const existing = await Campaign.findOne({ couponCode: code });
+        if (!existing) {
+            isUnique = true;
+        }
+    }
+    return code;
+};
+
 // Kampanya Oluşturma (Sadece Admin)
 exports.createCampaign = async (req, res) => {
     try {
-        const { title, description, discountType, discountValue, startDate, endDate, isActive, image } = req.body;
+        const { title, description, discountType, discountValue, startDate, endDate, isActive, image, couponCode } = req.body;
 
         if (!title || !discountValue || !endDate) {
             return res.status(400).json({ message: "Başlık, indirim değeri ve bitiş tarihi zorunludur!" });
+        }
+
+        // Eğer kupon kodu gelmediyse, otomatik oluştur
+        let finalCouponCode = couponCode;
+        if (!finalCouponCode) {
+            finalCouponCode = await generateShortCode();
+        } else {
+            // Eğer geldiyse, benzersiz mi kontrol et
+            const existing = await Campaign.findOne({ couponCode: finalCouponCode });
+            if (existing) {
+                return res.status(400).json({ message: "Bu kampanya kodu zaten kullanılıyor!" });
+            }
         }
 
         const newCampaign = await Campaign.create({
@@ -17,7 +50,8 @@ exports.createCampaign = async (req, res) => {
             startDate,
             endDate,
             isActive,
-            image
+            image,
+            couponCode: finalCouponCode
         });
 
         return res.status(201).json({
@@ -119,6 +153,82 @@ exports.toggleCampaignStatus = async (req, res) => {
             message: `Kampanya ${campaign.isActive ? 'aktif' : 'pasif'} hale getirildi!`,
             campaign,
         });
+    } catch (err) {
+        return res.status(500).json({ message: "Sunucu hatası!" });
+    }
+};
+
+// --- YENİ EKLENEN FONKSİYONLAR ---
+
+// Kod Doğrulama (Kullanıcı için)
+exports.validateCampaignCode = async (req, res) => {
+    try {
+        const { code } = req.body;
+        const userId = req.user.id;
+
+        if (!code) {
+            return res.status(400).json({ message: "Kod gerekli!" });
+        }
+
+        const campaign = await Campaign.findOne({ couponCode: code });
+
+        if (!campaign) {
+            return res.status(404).json({ valid: false, message: "Kupon bulunamadı!" });
+        }
+
+        if (!campaign.isActive) {
+            return res.status(400).json({ valid: false, message: "Bu kampanya aktif değil!" });
+        }
+
+        if (new Date(campaign.endDate) < new Date()) {
+            return res.status(400).json({ valid: false, message: "Kuponun süresi dolmuş!" });
+        }
+
+        // Kullanıcı daha önce kullanmış mı?
+        const isUsed = campaign.usedBy.includes(userId);
+        if (isUsed) {
+            return res.status(400).json({ valid: false, message: "Bu kuponu zaten kullandınız!" });
+        }
+
+        return res.status(200).json({
+            valid: true,
+            message: "Kupon geçerli!",
+            discountType: campaign.discountType,
+            discountValue: campaign.discountValue,
+            campaignTitle: campaign.title
+        });
+
+    } catch (err) {
+        console.error("Validate Campaign Code Error:", err);
+        return res.status(500).json({ message: "Sunucu hatası!" });
+    }
+};
+
+// Kodu Kullandı Olarak İşaretle (Genelde Order create içinde çağrılacak ama endpoint de dursun)
+exports.applyCampaignCode = async (req, res) => {
+    try {
+        const { code } = req.body;
+        const userId = req.user.id; // Auth middleware'den gelir
+
+        const campaign = await Campaign.findOne({ couponCode: code });
+        if (!campaign) {
+            return res.status(404).json({ message: "Kampanya bulunamadı" });
+        }
+
+        // Tekrar kontrol
+        if (new Date(campaign.endDate) < new Date()) {
+            return res.status(400).json({ message: "Süresi dolmuş!" });
+        }
+
+        if (campaign.usedBy.includes(userId)) {
+            return res.status(400).json({ message: "Zaten kullanılmış!" });
+        }
+
+        campaign.usedBy.push(userId);
+        await campaign.save();
+
+        return res.status(200).json({ message: "Kupon başarıyla uygulandı!" });
+
     } catch (err) {
         return res.status(500).json({ message: "Sunucu hatası!" });
     }
