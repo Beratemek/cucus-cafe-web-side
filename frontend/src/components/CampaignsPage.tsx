@@ -150,7 +150,7 @@ export function CampaignsPage() {
             </li>
              <li className="flex gap-3">
               <span className="text-[#8B5E3C] flex-shrink-0">•</span>
-              <span>Her kupon her üye bir defa kulanabilir.</span>
+              <span>Her kuponu, her üye bir defa kulanabilir.</span>
             </li>
             <li className="flex gap-3">
               <span className="text-[#8B5E3C] flex-shrink-0">•</span>
