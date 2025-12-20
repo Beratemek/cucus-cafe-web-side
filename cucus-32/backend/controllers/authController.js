@@ -1,4 +1,4 @@
-const user = require('../models/user');
+const User = require('../models/user');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const generateLoyaltyNumber = require('../utils/sadakatNoGenerator');
@@ -16,7 +16,7 @@ exports.register = async (req, res) => {
       return res.status(400).json({ message: "Lütfen tüm alanları doldurun!" });
     }
 
-    const existingUser = await user.findOne({ email });
+    const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res.status(400).json({ message: "Bu email ile zaten kayıt olunmuş." });
     }
@@ -30,7 +30,7 @@ exports.register = async (req, res) => {
     const verificationToken = crypto.randomBytes(20).toString('hex');
     const verificationTokenExpires = Date.now() + 24 * 60 * 60 * 1000; // 24 saat
 
-    const newUser = await user.create({
+    const newUser = await User.create({
       name,
       surname,
       email,
@@ -88,9 +88,14 @@ exports.register = async (req, res) => {
 };
 
 //Kullanıcı Girişi Yapma
+const path = require('path');
+
+// ...
+
 exports.login = async (req, res) => {
   try {
-    fs.writeFileSync('C:/Users/Fatih/cucus-cafe-web-side/DEBUG_START.txt', `Login attempt at ${new Date().toISOString()}\n`);
+    const debugPathStart = path.join(process.cwd(), 'DEBUG_START.txt');
+    fs.writeFileSync(debugPathStart, `Login attempt at ${new Date().toISOString()}\n`);
     //Alan Kontrolü
     const { email, password } = req.body;
     if (!email || !password) {
@@ -98,7 +103,7 @@ exports.login = async (req, res) => {
     }
 
     //Kullanıcı var mı?
-    const u = await user.findOne({ email });
+    const u = await User.findOne({ email });
     if (!u)
       return res.status(400).json({ message: "Bu email ile kayıtlı kullanıcı yok." });
 
@@ -129,7 +134,8 @@ exports.login = async (req, res) => {
     });
   } catch (error) {
     console.error("Login Error Details:", error);
-    fs.writeFileSync('C:/Users/Fatih/cucus-cafe-web-side/DEBUG_ERROR.txt', `Time: ${new Date().toISOString()}\nError: ${error.message}\nStack: ${error.stack}\n\n`, { flag: 'a' });
+    const debugPathError = path.join(process.cwd(), 'DEBUG_ERROR.txt');
+    fs.writeFileSync(debugPathError, `Time: ${new Date().toISOString()}\nError: ${error.message}\nStack: ${error.stack}\n\n`, { flag: 'a' });
     return res.status(500).json({ message: "Sunucu Hatası!", error: error.message }); // Hata detayını frontend'e dön (geçici olarak)
   }
 };
@@ -137,7 +143,7 @@ exports.login = async (req, res) => {
 //Bilgileri elde etme
 exports.me = async (req, res) => {
   try {
-    const u = await user.findById(req.user.id);
+    const u = await User.findById(req.user.id);
 
     if (!u) {
       return res.status(404).json({ message: "Kullanıcı bulunamadı" });
@@ -182,7 +188,7 @@ exports.forgotPassword = async (req, res) => {
 
     console.log('🔍 Şifre sıfırlama isteği:', email);
 
-    const u = await user.findOne({ email });
+    const u = await User.findOne({ email });
     if (!u) {
       console.log('⚠️  Kullanıcı bulunamadı:', email);
       return res.status(400).json({ message: "Bu email ile kullanıcı bulunamadı." });
@@ -249,7 +255,7 @@ exports.resetPassword = async (req, res) => {
     // Token hashlenerek kaydedilmişti, karşılaştırmak için gelen tokenı da hashle
     const resetPasswordToken = crypto.createHash('sha256').update(token).digest('hex');
 
-    const u = await user.findOne({
+    const u = await User.findOne({
       resetPasswordToken,
       resetPasswordExpires: { $gt: Date.now() } // Süresi dolmamış olmalı
     });
@@ -280,7 +286,7 @@ exports.verifyEmail = async (req, res) => {
   try {
     const { token } = req.body; // veya req.query.token (ama genelde front-end body ile atar POST requestte)
 
-    const u = await user.findOne({
+    const u = await User.findOne({
       verificationToken: token,
       verificationTokenExpires: { $gt: Date.now() }
     });

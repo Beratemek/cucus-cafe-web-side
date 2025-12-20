@@ -14,6 +14,7 @@ const connectDB = async () => {
     await mongoose.connect(mongoUri, {
       serverSelectionTimeoutMS: 30000, // 30 saniye timeout
       socketTimeoutMS: 45000,
+      family: 4 // IPv4 zorla
     });
 
     console.log("✅ MongoDB Başarıyla Bağlandı!");
