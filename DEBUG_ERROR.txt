@@ -1,0 +1,105 @@
+Time: 2025-12-20T09:54:36.921Z
+Error: Operation `users.findOne()` buffering timed out after 10000ms
+Stack: MongooseError: Operation `users.findOne()` buffering timed out after 10000ms
+    at Timeout.<anonymous> (C:\Users\Fatih\cucus-cafe-web-side\cucus-32\backend\node_modules\mongoose\lib\drivers\node-mongodb-native\collection.js:187:23)
+    at listOnTimeout (node:internal/timers:581:17)
+    at process.processTimers (node:internal/timers:519:7)
+
+Time: 2025-12-20T09:54:42.881Z
+Error: Operation `users.findOne()` buffering timed out after 10000ms
+Stack: MongooseError: Operation `users.findOne()` buffering timed out after 10000ms
+    at Timeout.<anonymous> (C:\Users\Fatih\cucus-cafe-web-side\cucus-32\backend\node_modules\mongoose\lib\drivers\node-mongodb-native\collection.js:187:23)
+    at listOnTimeout (node:internal/timers:581:17)
+    at process.processTimers (node:internal/timers:519:7)
+
+Time: 2025-12-20T09:54:44.415Z
+Error: Operation `users.findOne()` buffering timed out after 10000ms
+Stack: MongooseError: Operation `users.findOne()` buffering timed out after 10000ms
+    at Timeout.<anonymous> (C:\Users\Fatih\cucus-cafe-web-side\cucus-32\backend\node_modules\mongoose\lib\drivers\node-mongodb-native\collection.js:187:23)
+    at listOnTimeout (node:internal/timers:581:17)
+    at process.processTimers (node:internal/timers:519:7)
+
+Time: 2025-12-20T09:54:44.559Z
+Error: Operation `users.findOne()` buffering timed out after 10000ms
+Stack: MongooseError: Operation `users.findOne()` buffering timed out after 10000ms
+    at Timeout.<anonymous> (C:\Users\Fatih\cucus-cafe-web-side\cucus-32\backend\node_modules\mongoose\lib\drivers\node-mongodb-native\collection.js:187:23)
+    at listOnTimeout (node:internal/timers:581:17)
+    at process.processTimers (node:internal/timers:519:7)
+
+Time: 2025-12-20T09:54:44.715Z
+Error: Operation `users.findOne()` buffering timed out after 10000ms
+Stack: MongooseError: Operation `users.findOne()` buffering timed out after 10000ms
+    at Timeout.<anonymous> (C:\Users\Fatih\cucus-cafe-web-side\cucus-32\backend\node_modules\mongoose\lib\drivers\node-mongodb-native\collection.js:187:23)
+    at listOnTimeout (node:internal/timers:581:17)
+    at process.processTimers (node:internal/timers:519:7)
+
+Time: 2025-12-20T09:56:02.847Z
+Error: Operation `users.findOne()` buffering timed out after 10000ms
+Stack: MongooseError: Operation `users.findOne()` buffering timed out after 10000ms
+    at Timeout.<anonymous> (C:\Users\Fatih\cucus-cafe-web-side\cucus-32\backend\node_modules\mongoose\lib\drivers\node-mongodb-native\collection.js:187:23)
+    at listOnTimeout (node:internal/timers:581:17)
+    at process.processTimers (node:internal/timers:519:7)
+
+Time: 2025-12-20T09:56:10.402Z
+Error: Operation `users.findOne()` buffering timed out after 10000ms
+Stack: MongooseError: Operation `users.findOne()` buffering timed out after 10000ms
+    at Timeout.<anonymous> (C:\Users\Fatih\cucus-cafe-web-side\cucus-32\backend\node_modules\mongoose\lib\drivers\node-mongodb-native\collection.js:187:23)
+    at listOnTimeout (node:internal/timers:581:17)
+    at process.processTimers (node:internal/timers:519:7)
+
+Time: 2025-12-20T09:56:11.100Z
+Error: Operation `users.findOne()` buffering timed out after 10000ms
+Stack: MongooseError: Operation `users.findOne()` buffering timed out after 10000ms
+    at Timeout.<anonymous> (C:\Users\Fatih\cucus-cafe-web-side\cucus-32\backend\node_modules\mongoose\lib\drivers\node-mongodb-native\collection.js:187:23)
+    at listOnTimeout (node:internal/timers:581:17)
+    at process.processTimers (node:internal/timers:519:7)
+
+Time: 2025-12-20T09:56:11.242Z
+Error: Operation `users.findOne()` buffering timed out after 10000ms
+Stack: MongooseError: Operation `users.findOne()` buffering timed out after 10000ms
+    at Timeout.<anonymous> (C:\Users\Fatih\cucus-cafe-web-side\cucus-32\backend\node_modules\mongoose\lib\drivers\node-mongodb-native\collection.js:187:23)
+    at listOnTimeout (node:internal/timers:581:17)
+    at process.processTimers (node:internal/timers:519:7)
+
+Time: 2025-12-20T09:56:11.382Z
+Error: Operation `users.findOne()` buffering timed out after 10000ms
+Stack: MongooseError: Operation `users.findOne()` buffering timed out after 10000ms
+    at Timeout.<anonymous> (C:\Users\Fatih\cucus-cafe-web-side\cucus-32\backend\node_modules\mongoose\lib\drivers\node-mongodb-native\collection.js:187:23)
+    at listOnTimeout (node:internal/timers:581:17)
+    at process.processTimers (node:internal/timers:519:7)
+
+Time: 2025-12-20T09:56:11.538Z
+Error: Operation `users.findOne()` buffering timed out after 10000ms
+Stack: MongooseError: Operation `users.findOne()` buffering timed out after 10000ms
+    at Timeout.<anonymous> (C:\Users\Fatih\cucus-cafe-web-side\cucus-32\backend\node_modules\mongoose\lib\drivers\node-mongodb-native\collection.js:187:23)
+    at listOnTimeout (node:internal/timers:581:17)
+    at process.processTimers (node:internal/timers:519:7)
+
+Time: 2025-12-20T09:56:13.815Z
+Error: Operation `users.findOne()` buffering timed out after 10000ms
+Stack: MongooseError: Operation `users.findOne()` buffering timed out after 10000ms
+    at Timeout.<anonymous> (C:\Users\Fatih\cucus-cafe-web-side\cucus-32\backend\node_modules\mongoose\lib\drivers\node-mongodb-native\collection.js:187:23)
+    at listOnTimeout (node:internal/timers:581:17)
+    at process.processTimers (node:internal/timers:519:7)
+
+Time: 2025-12-20T09:56:20.415Z
+Error: Operation `users.findOne()` buffering timed out after 10000ms
+Stack: MongooseError: Operation `users.findOne()` buffering timed out after 10000ms
+    at Timeout.<anonymous> (C:\Users\Fatih\cucus-cafe-web-side\cucus-32\backend\node_modules\mongoose\lib\drivers\node-mongodb-native\collection.js:187:23)
+    at listOnTimeout (node:internal/timers:581:17)
+    at process.processTimers (node:internal/timers:519:7)
+
+Time: 2025-12-20T09:56:21.104Z
+Error: Operation `users.findOne()` buffering timed out after 10000ms
+Stack: MongooseError: Operation `users.findOne()` buffering timed out after 10000ms
+    at Timeout.<anonymous> (C:\Users\Fatih\cucus-cafe-web-side\cucus-32\backend\node_modules\mongoose\lib\drivers\node-mongodb-native\collection.js:187:23)
+    at listOnTimeout (node:internal/timers:581:17)
+    at process.processTimers (node:internal/timers:519:7)
+
+Time: 2025-12-20T09:56:24.448Z
+Error: Operation `users.findOne()` buffering timed out after 10000ms
+Stack: MongooseError: Operation `users.findOne()` buffering timed out after 10000ms
+    at Timeout.<anonymous> (C:\Users\Fatih\cucus-cafe-web-side\cucus-32\backend\node_modules\mongoose\lib\drivers\node-mongodb-native\collection.js:187:23)
+    at listOnTimeout (node:internal/timers:581:17)
+    at process.processTimers (node:internal/timers:519:7)
+
