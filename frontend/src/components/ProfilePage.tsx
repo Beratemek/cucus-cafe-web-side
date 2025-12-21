@@ -283,7 +283,7 @@ export function ProfilePage({ initialTab = 'login' }: ProfilePageProps) {
   };
 
   const benefits = [
-    'Alışveriş yaptıkça puan kazanma','İlk siparişinizde %20 indirim', 'Her 500 Puana 1 kahve hediye',
+    'İlk siparişinizde %20 indirim', 'Her siparişinizde puan kazanın', 'Her 500 Puana 1 kahve hediye',
     'Özel kampanyalardan ilk siz haberdar olun',
   ];
 
