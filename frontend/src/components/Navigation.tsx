@@ -58,22 +58,20 @@ export function Navigation({
               const isActive = currentPage === item.id;
               const isProfile = item.id === 'profile';
 
-              // Temel Sınıflar (Boyutlandırma) - Hepsi Eşit: px-4 py-2
-              // border-transparent ekledik ki diğerlerinde sınır olmasa bile boyut kaymasın.
-              let buttonClasses = "px-4 py-2 text-sm font-medium rounded-full transition-all duration-300 border ";
+              // GÜNCELLEME: border yerine border-2 kullandım (Daha kalın)
+              // Tüm butonlara border-2 verdik ki yükseklikleri eşit kalsın.
+              let buttonClasses = "px-4 py-2 text-sm font-medium rounded-full transition-all duration-300 border-2 ";
 
               if (isActive) {
-                // 1. DURUM: AKTİF (HEPSİ İÇİN GEÇERLİ)
-                // İster profil olsun ister başka, aktifse içi dolu kahverengi.
+                // 1. DURUM: AKTİF (İÇİ DOLU)
                 buttonClasses += "border-[#8B5E3C] bg-[#8B5E3C] text-white shadow-sm";
               } else if (isProfile) {
-                // 2. DURUM: PROFİL PASİF (ÇERÇEVELİ)
-                // Aktif değil ama Profil ise: İçi boş, Çerçevesi Kahverengi.
-                // Hover olunca içi dolsun diye hover:bg ekledim, çok şık durur.
+                // 2. DURUM: PROFİL PASİF (KALIN ÇERÇEVELİ)
+                // border-2 zaten yukarıda tanımlı, rengi veriyoruz.
                 buttonClasses += "border-[#8B5E3C] text-[#8B5E3C] hover:bg-[#8B5E3C] hover:text-white";
               } else {
-                // 3. DURUM: DİĞERLERİ PASİF (STANDART)
-                // Çerçeve şeffaf (border-transparent).
+                // 3. DURUM: DİĞERLERİ PASİF
+                // border-transparent ile görünmez kalınlık veriyoruz (hiza bozulmasın diye).
                 buttonClasses += "border-transparent text-[#8B5E3C] hover:text-[#2D1B12] hover:bg-[#F5EFE6]";
               }
 
@@ -117,17 +115,14 @@ export function Navigation({
               const isActive = currentPage === item.id;
               const isProfile = item.id === 'profile';
 
-              // MOBİL İÇİN AYNI MANTIK
-              let mobileClasses = "block w-full text-left py-3 px-4 text-base font-medium rounded-xl mb-1 transition-all border ";
+              // MOBİL İÇİN DE border-2
+              let mobileClasses = "block w-full text-left py-3 px-4 text-base font-medium rounded-xl mb-1 transition-all border-2 ";
 
               if (isActive) {
-                // Aktifse Dolu
                 mobileClasses += "border-[#8B5E3C] bg-[#8B5E3C] text-white";
               } else if (isProfile) {
-                 // Profil Pasifse Çerçeveli
                 mobileClasses += "border-[#8B5E3C] text-[#8B5E3C]";
               } else {
-                // Diğer Pasifler
                 mobileClasses += "border-transparent text-[#8B5E3C] hover:text-[#2D1B12] hover:bg-[#F5EFE6]";
               }
 
