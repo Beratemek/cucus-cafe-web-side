@@ -9,12 +9,7 @@ interface NavigationProps {
   isAdmin?: boolean;
 }
 
-export function Navigation({
-  currentPage,
-  onNavigate,
-  onAdminClick,
-  isAdmin = false,
-}: NavigationProps) {
+export function Navigation({ currentPage, onNavigate, onAdminClick, isAdmin = false }: NavigationProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const navItems = [
@@ -30,31 +25,28 @@ export function Navigation({
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-20">
           <button onClick={() => onNavigate('home')} className="flex items-center gap-3 group">
-            <div className="w-14 h-14 rounded-full overflow-hidden bg-white shadow-md ring-2 ring-[#E6D3BA] group-hover:ring-[#C8A27A] transition-all">
-              <img src={logoImage} alt="CuCu's Coffee & Cake" className="w-full h-full object-cover" />
+            <div className="relative">
+              <div className="w-14 h-14 rounded-full overflow-hidden bg-white shadow-md ring-2 ring-[#E6D3BA] group-hover:ring-[#C8A27A] transition-all">
+                <img src={logoImage} alt="CuCu's Coffee & Cake" className="w-full h-full object-cover" />
+              </div>
             </div>
             <div>
               <span className="text-xl text-[#2D1B12]">CuCu's Coffee & Cake</span>
-              <div className="text-[10px] text-[#8B5E3C] tracking-widest uppercase">
-                Sweet Moments
-              </div>
+              <div className="text-[10px] text-[#8B5E3C] tracking-widest uppercase">Sweet Moments</div>
             </div>
           </button>
-
+          
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center gap-2">
             {navItems.map((item) => {
               const isActive = currentPage === item.id;
-              const isProfile = item.id === 'profile';
-
+              
               return (
                 <button
                   key={item.id}
                   onClick={() => onNavigate(item.id)}
                   className={`px-4 py-2 text-sm transition-all duration-200 rounded-full ${
-                    isProfile
-                      ? 'text-white bg-gradient-to-r from-green-600 to-green-600 hover:opacity-90'
-                      : isActive
+                    isActive
                       ? 'text-white bg-gradient-to-r from-[#8B5E3C] to-[#8B5E3C]'
                       : 'text-[#8B5E3C] hover:text-[#2D1B12] hover:bg-[#E6D3BA]'
                   }`}
@@ -63,13 +55,15 @@ export function Navigation({
                 </button>
               );
             })}
-
+            
+            {/* Admin Link - Only visible for admin users */}
             {isAdmin && (
               <button
                 onClick={onAdminClick}
-                className="ml-2 p-2 text-[#8B5E3C] hover:text-[#2D1B12] hover:bg-[#E6D3BA] rounded-full transition-all duration-200"
+                className="ml-2 p-2 text-[#8B5E3C] hover:text-[#2D1B12] hover:bg-[#E6D3BA] rounded-full transition-all duration-200 group"
+                title="Yönetici Girişi"
               >
-                <Shield className="w-5 h-5" />
+                <Shield className="w-5 h-5 group-hover:scale-110 transition-transform" />
               </button>
             )}
           </div>
@@ -77,7 +71,8 @@ export function Navigation({
           {/* Mobile Menu Button */}
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="md:hidden p-2 text-[#2D1B12] hover:bg-[#E6D3BA] rounded-full"
+            className="md:hidden p-2 text-[#2D1B12] hover:bg-[#E6D3BA] rounded-full transition-colors"
+            aria-label="Menu"
           >
             {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
           </button>
@@ -88,8 +83,7 @@ export function Navigation({
           <div className="md:hidden py-4 border-t border-[#E6D3BA]">
             {navItems.map((item) => {
               const isActive = currentPage === item.id;
-              const isProfile = item.id === 'profile';
-
+              
               return (
                 <button
                   key={item.id}
@@ -97,10 +91,8 @@ export function Navigation({
                     onNavigate(item.id);
                     setMobileMenuOpen(false);
                   }}
-                  className={`block w-full text-left py-3 px-4 text-base rounded-xl mb-1 transition-colors ${
-                    isProfile
-                      ? 'text-white bg-gradient-to-r from-green-600 to-green-600'
-                      : isActive
+                  className={`block w-full text-left py-3 px-4 text-base transition-colors rounded-xl mb-1 ${
+                    isActive
                       ? 'text-white bg-gradient-to-r from-[#8B5E3C] to-[#8B5E3C]'
                       : 'text-[#8B5E3C] hover:text-[#2D1B12] hover:bg-[#E6D3BA]'
                   }`}
@@ -109,6 +101,20 @@ export function Navigation({
                 </button>
               );
             })}
+            
+            {/* Admin Link - Mobile - Only visible for admin users */}
+            {isAdmin && (
+              <button
+                onClick={() => {
+                  onAdminClick();
+                  setMobileMenuOpen(false);
+                }}
+                className="flex items-center gap-2 py-3 px-4 text-base text-[#8B5E3C] hover:text-[#2D1B12] hover:bg-[#E6D3BA] transition-colors rounded-xl mt-2 border-t border-[#E6D3BA] pt-4 w-full"
+              >
+                <Shield className="w-5 h-5" />
+                Yönetici Girişi
+              </button>
+            )}
           </div>
         )}
       </div>
