@@ -58,22 +58,30 @@ export function Navigation({
               const isActive = currentPage === item.id;
               const isProfile = item.id === 'profile';
 
+              // Temel Sınıflar (Boyutlandırma) - Hepsi Eşit: px-4 py-2
+              // border-transparent ekledik ki diğerlerinde sınır olmasa bile boyut kaymasın.
+              let buttonClasses = "px-4 py-2 text-sm font-medium rounded-full transition-all duration-300 border ";
+
+              if (isActive) {
+                // 1. DURUM: AKTİF (HEPSİ İÇİN GEÇERLİ)
+                // İster profil olsun ister başka, aktifse içi dolu kahverengi.
+                buttonClasses += "border-[#8B5E3C] bg-[#8B5E3C] text-white shadow-sm";
+              } else if (isProfile) {
+                // 2. DURUM: PROFİL PASİF (ÇERÇEVELİ)
+                // Aktif değil ama Profil ise: İçi boş, Çerçevesi Kahverengi.
+                // Hover olunca içi dolsun diye hover:bg ekledim, çok şık durur.
+                buttonClasses += "border-[#8B5E3C] text-[#8B5E3C] hover:bg-[#8B5E3C] hover:text-white";
+              } else {
+                // 3. DURUM: DİĞERLERİ PASİF (STANDART)
+                // Çerçeve şeffaf (border-transparent).
+                buttonClasses += "border-transparent text-[#8B5E3C] hover:text-[#2D1B12] hover:bg-[#F5EFE6]";
+              }
+
               return (
                 <button
                   key={item.id}
                   onClick={() => onNavigate(item.id)}
-                  // GARANTİ ÇÖZÜM BURADA:
-                  // Eğer bu profil butonuysa, arka plan rengini doğrudan stil olarak veriyoruz.
-                  // Bu sayede Tailwind hatası olsa bile renk zorla uygulanır.
-                  style={isProfile ? { backgroundColor: '#5D7553' } : {}}
-                  
-                  className={`px-4 py-2 text-sm font-medium rounded-full transition-all duration-300 ${
-                    isProfile
-                      ? 'text-white shadow-md hover:opacity-90 hover:-translate-y-0.5' // Arka planı style ile verdik, class'tan sildik.
-                      : isActive
-                      ? 'text-white bg-[#8B5E3C] shadow-sm'
-                      : 'text-[#8B5E3C] hover:text-[#2D1B12] hover:bg-[#F5EFE6]'
-                  }`}
+                  className={buttonClasses}
                 >
                   {item.label}
                 </button>
@@ -109,6 +117,20 @@ export function Navigation({
               const isActive = currentPage === item.id;
               const isProfile = item.id === 'profile';
 
+              // MOBİL İÇİN AYNI MANTIK
+              let mobileClasses = "block w-full text-left py-3 px-4 text-base font-medium rounded-xl mb-1 transition-all border ";
+
+              if (isActive) {
+                // Aktifse Dolu
+                mobileClasses += "border-[#8B5E3C] bg-[#8B5E3C] text-white";
+              } else if (isProfile) {
+                 // Profil Pasifse Çerçeveli
+                mobileClasses += "border-[#8B5E3C] text-[#8B5E3C]";
+              } else {
+                // Diğer Pasifler
+                mobileClasses += "border-transparent text-[#8B5E3C] hover:text-[#2D1B12] hover:bg-[#F5EFE6]";
+              }
+
               return (
                 <button
                   key={item.id}
@@ -116,16 +138,7 @@ export function Navigation({
                     onNavigate(item.id);
                     setMobileMenuOpen(false);
                   }}
-                  // MOBİLDE DE AYNI GARANTİ YÖNTEM:
-                  style={isProfile ? { backgroundColor: '#5D7553' } : {}}
-                  
-                  className={`block w-full text-left py-3 px-4 text-base font-medium rounded-xl mb-1 transition-all ${
-                    isProfile
-                      ? 'text-white shadow-md'
-                      : isActive
-                      ? 'text-white bg-[#8B5E3C]'
-                      : 'text-[#8B5E3C] hover:text-[#2D1B12] hover:bg-[#F5EFE6]'
-                  }`}
+                  className={mobileClasses}
                 >
                   {item.label}
                 </button>
