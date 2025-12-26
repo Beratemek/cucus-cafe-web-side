@@ -9,7 +9,12 @@ interface NavigationProps {
   isAdmin?: boolean;
 }
 
-export function Navigation({ currentPage, onNavigate, onAdminClick, isAdmin = false }: NavigationProps) {
+export function Navigation({
+  currentPage,
+  onNavigate,
+  onAdminClick,
+  isAdmin = false,
+}: NavigationProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const navItems = [
@@ -24,43 +29,67 @@ export function Navigation({ currentPage, onNavigate, onAdminClick, isAdmin = fa
     <nav className="bg-white/95 backdrop-blur-md border-b border-[#E6D3BA] sticky top-0 z-50 shadow-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-20">
-          <button onClick={() => onNavigate('home')} className="flex items-center gap-3 group">
+          
+          {/* LOGO ALANI */}
+          <button
+            onClick={() => onNavigate('home')}
+            className="flex items-center gap-3 group"
+          >
             <div className="relative">
               <div className="w-14 h-14 rounded-full overflow-hidden bg-white shadow-md ring-2 ring-[#E6D3BA] group-hover:ring-[#C8A27A] transition-all">
-                <img src={logoImage} alt="CuCu's Coffee & Cake" className="w-full h-full object-cover" />
+                <img
+                  src={logoImage}
+                  alt="CuCu's Coffee & Cake"
+                  className="w-full h-full object-cover"
+                />
               </div>
             </div>
             <div>
-              <span className="text-xl text-[#2D1B12]">CuCu's Coffee & Cake</span>
-              <div className="text-[10px] text-[#8B5E3C] tracking-widest uppercase">Sweet Moments</div>
+              <span className="text-xl text-[#2D1B12] font-medium">
+                CuCu's Coffee & Cake
+              </span>
+              <div className="text-[10px] text-[#8B5E3C] tracking-widest uppercase font-semibold">
+                Sweet Moments
+              </div>
             </div>
           </button>
-          
-          {/* Desktop Navigation */}
+
+          {/* DESKTOP MENU */}
           <div className="hidden md:flex items-center gap-2">
             {navItems.map((item) => {
               const isActive = currentPage === item.id;
-              
+              const isProfile = item.id === 'profile';
+
               return (
                 <button
                   key={item.id}
                   onClick={() => onNavigate(item.id)}
-                  className={`px-4 py-2 text-sm transition-all duration-200 rounded-full ${
-                    isActive
-                      ? 'text-white bg-gradient-to-r from-[#8B5E3C] to-[#8B5E3C]'
-                      : 'text-[#8B5E3C] hover:text-[#2D1B12] hover:bg-[#E6D3BA]'
+                  // BUTON STİL MANTIĞI BURADA:
+                  className={`px-5 py-2.5 text-sm font-medium transition-all duration-300 rounded-full ${
+                    
+                    // 1. ÖNCELİK: HESABIM BUTONU (HER ZAMAN AYNI RENK)
+                    // Renk Kodu: #5D7553 (Matcha/Zeytin Yeşili) - Paletinize en uygun yeşil.
+                    isProfile
+                      ? 'text-white bg-[#5D7553] hover:bg-[#4A5D42] shadow-md hover:shadow-lg hover:-translate-y-0.5'
+                      
+                    // 2. ÖNCELİK: DİĞER BUTONLAR AKTİFSE (KAHVERENGİ)
+                    : isActive
+                      ? 'text-white bg-[#8B5E3C] shadow-sm'
+                      
+                    // 3. ÖNCELİK: PASİF DURUM
+                    : 'text-[#8B5E3C] hover:text-[#2D1B12] hover:bg-[#F5EFE6]'
                   }`}
                 >
                   {item.label}
                 </button>
               );
             })}
-            
-            {/* Admin Link - Only visible for admin users */}
+
+            {/* Admin Link */}
             {isAdmin && (
               <button
                 onClick={onAdminClick}
-                className="ml-2 p-2 text-[#8B5E3C] hover:text-[#2D1B12] hover:bg-[#E6D3BA] rounded-full transition-all duration-200 group"
+                className="ml-2 p-2 text-[#8B5E3C] hover:text-[#2D1B12] hover:bg-[#F5EFE6] rounded-full transition-all duration-200 group"
                 title="Yönetici Girişi"
               >
                 <Shield className="w-5 h-5 group-hover:scale-110 transition-transform" />
@@ -68,22 +97,27 @@ export function Navigation({ currentPage, onNavigate, onAdminClick, isAdmin = fa
             )}
           </div>
 
-          {/* Mobile Menu Button */}
+          {/* MOBILE MENU BUTTON */}
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="md:hidden p-2 text-[#2D1B12] hover:bg-[#E6D3BA] rounded-full transition-colors"
+            className="md:hidden p-2 text-[#2D1B12] hover:bg-[#F5EFE6] rounded-full transition-colors"
             aria-label="Menu"
           >
-            {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+            {mobileMenuOpen ? (
+              <X className="w-6 h-6" />
+            ) : (
+              <Menu className="w-6 h-6" />
+            )}
           </button>
         </div>
 
-        {/* Mobile Navigation */}
+        {/* MOBILE NAVIGATION */}
         {mobileMenuOpen && (
-          <div className="md:hidden py-4 border-t border-[#E6D3BA]">
+          <div className="md:hidden py-4 border-t border-[#E6D3BA] bg-white/95">
             {navItems.map((item) => {
               const isActive = currentPage === item.id;
-              
+              const isProfile = item.id === 'profile';
+
               return (
                 <button
                   key={item.id}
@@ -91,25 +125,27 @@ export function Navigation({ currentPage, onNavigate, onAdminClick, isAdmin = fa
                     onNavigate(item.id);
                     setMobileMenuOpen(false);
                   }}
-                  className={`block w-full text-left py-3 px-4 text-base transition-colors rounded-xl mb-1 ${
-                    isActive
-                      ? 'text-white bg-gradient-to-r from-[#8B5E3C] to-[#8B5E3C]'
-                      : 'text-[#8B5E3C] hover:text-[#2D1B12] hover:bg-[#E6D3BA]'
+                  className={`block w-full text-left py-3 px-4 text-base font-medium rounded-xl mb-1 transition-all ${
+                    // MOBİL İÇİN AYNI MANTIK
+                    isProfile
+                      ? 'text-white bg-[#5D7553] shadow-md' // Hep Yeşil
+                      : isActive
+                      ? 'text-white bg-[#8B5E3C]' // Aktif Kahve
+                      : 'text-[#8B5E3C] hover:text-[#2D1B12] hover:bg-[#F5EFE6]' // Pasif
                   }`}
                 >
                   {item.label}
                 </button>
               );
             })}
-            
-            {/* Admin Link - Mobile - Only visible for admin users */}
+
             {isAdmin && (
               <button
                 onClick={() => {
                   onAdminClick();
                   setMobileMenuOpen(false);
                 }}
-                className="flex items-center gap-2 py-3 px-4 text-base text-[#8B5E3C] hover:text-[#2D1B12] hover:bg-[#E6D3BA] transition-colors rounded-xl mt-2 border-t border-[#E6D3BA] pt-4 w-full"
+                className="flex items-center gap-2 py-3 px-4 text-base text-[#8B5E3C] hover:text-[#2D1B12] hover:bg-[#F5EFE6] transition-colors rounded-xl mt-2 border-t border-[#E6D3BA] pt-4 w-full"
               >
                 <Shield className="w-5 h-5" />
                 Yönetici Girişi
