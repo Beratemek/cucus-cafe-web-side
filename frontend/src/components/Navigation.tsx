@@ -58,26 +58,22 @@ export function Navigation({
               const isActive = currentPage === item.id;
               const isProfile = item.id === 'profile';
 
-              // 1. ADIM: TEMEL SINIFLAR (HEPSİ İÇİN AYNI BOYUT: px-4 py-2)
-              let buttonClasses = "px-4 py-2 text-sm font-medium rounded-full transition-all duration-300 ";
-
-              // 2. ADIM: RENK VE GÖRÜNÜM AYARLARI
-              if (isProfile) {
-                // DURUM 1: HESABIM (Yeşil ve Dolu)
-                buttonClasses += "text-white bg-[#5D7553] hover:bg-[#4A5D42] shadow-md";
-              } else if (isActive) {
-                // DURUM 2: DİĞERLERİ AKTİF (Kahverengi ve Dolu)
-                buttonClasses += "text-white bg-[#8B5E3C] shadow-sm";
-              } else {
-                // DURUM 3: DİĞERLERİ PASİF (Şeffaf)
-                buttonClasses += "text-[#8B5E3C] hover:text-[#2D1B12] hover:bg-[#F5EFE6]";
-              }
-
               return (
                 <button
                   key={item.id}
                   onClick={() => onNavigate(item.id)}
-                  className={buttonClasses}
+                  // GARANTİ ÇÖZÜM BURADA:
+                  // Eğer bu profil butonuysa, arka plan rengini doğrudan stil olarak veriyoruz.
+                  // Bu sayede Tailwind hatası olsa bile renk zorla uygulanır.
+                  style={isProfile ? { backgroundColor: '#5D7553' } : {}}
+                  
+                  className={`px-4 py-2 text-sm font-medium rounded-full transition-all duration-300 ${
+                    isProfile
+                      ? 'text-white shadow-md hover:opacity-90 hover:-translate-y-0.5' // Arka planı style ile verdik, class'tan sildik.
+                      : isActive
+                      ? 'text-white bg-[#8B5E3C] shadow-sm'
+                      : 'text-[#8B5E3C] hover:text-[#2D1B12] hover:bg-[#F5EFE6]'
+                  }`}
                 >
                   {item.label}
                 </button>
@@ -113,17 +109,6 @@ export function Navigation({
               const isActive = currentPage === item.id;
               const isProfile = item.id === 'profile';
 
-              // MOBİL İÇİN DE AYNI MANTIK
-              let mobileClasses = "block w-full text-left py-3 px-4 text-base font-medium rounded-xl mb-1 transition-all ";
-
-              if (isProfile) {
-                mobileClasses += "text-white bg-[#5D7553] shadow-md";
-              } else if (isActive) {
-                mobileClasses += "text-white bg-[#8B5E3C]";
-              } else {
-                mobileClasses += "text-[#8B5E3C] hover:text-[#2D1B12] hover:bg-[#F5EFE6]";
-              }
-
               return (
                 <button
                   key={item.id}
@@ -131,7 +116,16 @@ export function Navigation({
                     onNavigate(item.id);
                     setMobileMenuOpen(false);
                   }}
-                  className={mobileClasses}
+                  // MOBİLDE DE AYNI GARANTİ YÖNTEM:
+                  style={isProfile ? { backgroundColor: '#5D7553' } : {}}
+                  
+                  className={`block w-full text-left py-3 px-4 text-base font-medium rounded-xl mb-1 transition-all ${
+                    isProfile
+                      ? 'text-white shadow-md'
+                      : isActive
+                      ? 'text-white bg-[#8B5E3C]'
+                      : 'text-[#8B5E3C] hover:text-[#2D1B12] hover:bg-[#F5EFE6]'
+                  }`}
                 >
                   {item.label}
                 </button>
