@@ -29,7 +29,7 @@ export function Navigation({
     <nav className="bg-white/95 backdrop-blur-md border-b border-[#E6D3BA] sticky top-0 z-50 shadow-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-20">
-
+          
           {/* LOGO */}
           <button
             onClick={() => onNavigate('home')}
@@ -58,25 +58,19 @@ export function Navigation({
               const isActive = currentPage === item.id;
               const isProfile = item.id === 'profile';
 
-              let buttonClasses =
-                'text-sm font-medium rounded-full transition-all duration-300 ';
+              // 1. ADIM: TEMEL SINIFLAR (HEPSİ İÇİN AYNI BOYUT: px-4 py-2)
+              let buttonClasses = "px-4 py-2 text-sm font-medium rounded-full transition-all duration-300 ";
 
-              if (isProfile && isActive) {
-                // HESABIM – AKTİF (KOYU YEŞİL)
-                buttonClasses +=
-                  'px-5 py-2.5 text-white !bg-[#3F5238] shadow-md';
-              } else if (isProfile) {
-                // HESABIM – NORMAL (AÇIK YEŞİL)
-                buttonClasses +=
-                  'px-5 py-2.5 text-white !bg-[#5D7553] hover:!bg-[#4A5D42] shadow-md hover:shadow-lg hover:-translate-y-0.5';
+              // 2. ADIM: RENK VE GÖRÜNÜM AYARLARI
+              if (isProfile) {
+                // DURUM 1: HESABIM (Yeşil ve Dolu)
+                buttonClasses += "text-white bg-[#5D7553] hover:bg-[#4A5D42] shadow-md";
               } else if (isActive) {
-                // DİĞERLERİ AKTİF (KAHVERENGİ – AYNI KALDI)
-                buttonClasses +=
-                  'px-4 py-2 text-white bg-[#8B5E3C] shadow-sm';
+                // DURUM 2: DİĞERLERİ AKTİF (Kahverengi ve Dolu)
+                buttonClasses += "text-white bg-[#8B5E3C] shadow-sm";
               } else {
-                // PASİF
-                buttonClasses +=
-                  'px-4 py-2 text-[#8B5E3C] hover:text-[#2D1B12] hover:bg-[#F5EFE6]';
+                // DURUM 3: DİĞERLERİ PASİF (Şeffaf)
+                buttonClasses += "text-[#8B5E3C] hover:text-[#2D1B12] hover:bg-[#F5EFE6]";
               }
 
               return (
@@ -90,6 +84,7 @@ export function Navigation({
               );
             })}
 
+            {/* Admin Butonu */}
             {isAdmin && (
               <button
                 onClick={onAdminClick}
@@ -111,28 +106,22 @@ export function Navigation({
           </button>
         </div>
 
-        {/* MOBILE MENU */}
+        {/* MOBILE MENU LIST */}
         {mobileMenuOpen && (
           <div className="md:hidden py-4 border-t border-[#E6D3BA] bg-white/95">
             {navItems.map((item) => {
               const isActive = currentPage === item.id;
               const isProfile = item.id === 'profile';
 
-              let mobileClasses =
-                'block w-full text-left rounded-xl mb-1 transition-all font-medium ';
+              // MOBİL İÇİN DE AYNI MANTIK
+              let mobileClasses = "block w-full text-left py-3 px-4 text-base font-medium rounded-xl mb-1 transition-all ";
 
-              if (isProfile && isActive) {
-                mobileClasses +=
-                  'px-4 py-3 text-white !bg-[#3F5238] shadow-md';
-              } else if (isProfile) {
-                mobileClasses +=
-                  'px-4 py-3 text-white !bg-[#5D7553] shadow-md';
+              if (isProfile) {
+                mobileClasses += "text-white bg-[#5D7553] shadow-md";
               } else if (isActive) {
-                mobileClasses +=
-                  'px-4 py-3 text-white bg-[#8B5E3C]';
+                mobileClasses += "text-white bg-[#8B5E3C]";
               } else {
-                mobileClasses +=
-                  'px-4 py-3 text-[#8B5E3C] hover:text-[#2D1B12] hover:bg-[#F5EFE6]';
+                mobileClasses += "text-[#8B5E3C] hover:text-[#2D1B12] hover:bg-[#F5EFE6]";
               }
 
               return (
