@@ -58,30 +58,38 @@ export function Navigation({
               const isActive = currentPage === item.id;
               const isProfile = item.id === 'profile';
 
+              let buttonClasses =
+                'text-sm font-medium rounded-full transition-all duration-300 ';
+
+              if (isProfile && isActive) {
+                // HESABIM – AKTİF (KOYU YEŞİL)
+                buttonClasses +=
+                  'px-5 py-2.5 text-white !bg-[#3F5238] shadow-md';
+              } else if (isProfile) {
+                // HESABIM – NORMAL (AÇIK YEŞİL)
+                buttonClasses +=
+                  'px-5 py-2.5 text-white !bg-[#5D7553] hover:!bg-[#4A5D42] shadow-md hover:shadow-lg hover:-translate-y-0.5';
+              } else if (isActive) {
+                // DİĞERLERİ AKTİF (KAHVERENGİ – AYNI KALDI)
+                buttonClasses +=
+                  'px-4 py-2 text-white bg-[#8B5E3C] shadow-sm';
+              } else {
+                // PASİF
+                buttonClasses +=
+                  'px-4 py-2 text-[#8B5E3C] hover:text-[#2D1B12] hover:bg-[#F5EFE6]';
+              }
+
               return (
                 <button
                   key={item.id}
                   onClick={() => onNavigate(item.id)}
-                  className={`
-                    text-sm font-medium rounded-full transition-all duration-300
-                    ${
-                      isProfile
-                        ? // HESABIM – HER ZAMAN YEŞİL
-                          'px-5 py-2.5 text-white !bg-[#5D7553] hover:!bg-[#4A5D42] shadow-md hover:shadow-lg hover:-translate-y-0.5'
-                        : isActive
-                        ? // AKTİF – ESKİ GÜZEL BOYUT (KAHVERENGİ)
-                          'px-4 py-2 text-white bg-[#8B5E3C] shadow-sm'
-                        : // PASİF
-                          'px-4 py-2 text-[#8B5E3C] hover:text-[#2D1B12] hover:bg-[#F5EFE6]'
-                    }
-                  `}
+                  className={buttonClasses}
                 >
                   {item.label}
                 </button>
               );
             })}
 
-            {/* ADMIN */}
             {isAdmin && (
               <button
                 onClick={onAdminClick}
@@ -96,7 +104,7 @@ export function Navigation({
           {/* MOBILE MENU BUTTON */}
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="md:hidden p-2 text-[#2D1B12] hover:bg-[#F5EFE6] rounded-full"
+            className="md:hidden p-2 text-[#2D1B12] hover:bg-[#F5EFE6] rounded-full transition-colors"
             aria-label="Menu"
           >
             {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
@@ -110,6 +118,23 @@ export function Navigation({
               const isActive = currentPage === item.id;
               const isProfile = item.id === 'profile';
 
+              let mobileClasses =
+                'block w-full text-left rounded-xl mb-1 transition-all font-medium ';
+
+              if (isProfile && isActive) {
+                mobileClasses +=
+                  'px-4 py-3 text-white !bg-[#3F5238] shadow-md';
+              } else if (isProfile) {
+                mobileClasses +=
+                  'px-4 py-3 text-white !bg-[#5D7553] shadow-md';
+              } else if (isActive) {
+                mobileClasses +=
+                  'px-4 py-3 text-white bg-[#8B5E3C]';
+              } else {
+                mobileClasses +=
+                  'px-4 py-3 text-[#8B5E3C] hover:text-[#2D1B12] hover:bg-[#F5EFE6]';
+              }
+
               return (
                 <button
                   key={item.id}
@@ -117,16 +142,7 @@ export function Navigation({
                     onNavigate(item.id);
                     setMobileMenuOpen(false);
                   }}
-                  className={`
-                    block w-full text-left rounded-xl mb-1 transition-all font-medium
-                    ${
-                      isProfile
-                        ? 'px-4 py-3 text-white !bg-[#5D7553] shadow-md'
-                        : isActive
-                        ? 'px-4 py-3 text-white bg-[#8B5E3C]'
-                        : 'px-4 py-3 text-[#8B5E3C] hover:text-[#2D1B12] hover:bg-[#F5EFE6]'
-                    }
-                  `}
+                  className={mobileClasses}
                 >
                   {item.label}
                 </button>
