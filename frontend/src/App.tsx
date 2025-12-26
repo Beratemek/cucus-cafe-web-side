@@ -14,7 +14,7 @@ import { VerifyEmailPage } from './components/VerifyEmailPage';
 import { API_URL } from './config';
 import { Toaster } from 'sonner';
 
-function MainLayout({ children, isAdmin }: { children: React.ReactNode; isAdmin: boolean }) {
+function MainLayout({ children, isAdmin, isLoggedIn }: { children: React.ReactNode; isAdmin: boolean; isLoggedIn: boolean }) {
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -35,6 +35,7 @@ function MainLayout({ children, isAdmin }: { children: React.ReactNode; isAdmin:
         onNavigate={(page) => navigate(page === 'home' ? '/' : `/${page}`)}
         onAdminClick={() => navigate('/admin')}
         isAdmin={isAdmin}
+        isLoggedIn={isLoggedIn}
       />
       <Toaster richColors />
       {children}
@@ -44,6 +45,7 @@ function MainLayout({ children, isAdmin }: { children: React.ReactNode; isAdmin:
 
 export default function App() {
   const [isAdminLoggedIn, setIsAdminLoggedIn] = useState(false);
+  const [isUserLoggedIn, setIsUserLoggedIn] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [profileInitialTab, setProfileInitialTab] = useState<'login' | 'register'>('login');
 
@@ -68,6 +70,7 @@ export default function App() {
 
         if (response.ok) {
           const data = await response.json();
+          setIsUserLoggedIn(true);
           if (data.user.role === 'admin') {
             setIsAdminLoggedIn(true);
           }
@@ -91,6 +94,7 @@ export default function App() {
     localStorage.removeItem('token');
     sessionStorage.removeItem('token');
     setIsAdminLoggedIn(false);
+    setIsUserLoggedIn(false);
     navigate('/');
   };
 
@@ -105,7 +109,7 @@ export default function App() {
   return (
     <Routes>
       <Route path="/" element={
-        <MainLayout isAdmin={isAdminLoggedIn}>
+        <MainLayout isAdmin={isAdminLoggedIn} isLoggedIn={isUserLoggedIn}>
           <HomePage 
             onNavigate={(page) => navigate(page === 'home' ? '/' : `/${page}`)} 
             onNavigateToRegister={() => {
@@ -116,10 +120,10 @@ export default function App() {
         </MainLayout>
       } />
       
-      <Route path="/menu" element={<MainLayout isAdmin={isAdminLoggedIn}><MenuPage /></MainLayout>} />
-      <Route path="/campaigns" element={<MainLayout isAdmin={isAdminLoggedIn}><CampaignsPage /></MainLayout>} />
-      <Route path="/profile" element={<MainLayout isAdmin={isAdminLoggedIn}><ProfilePage initialTab={profileInitialTab} /></MainLayout>} />
-      <Route path="/contact" element={<MainLayout isAdmin={isAdminLoggedIn}><ContactPage /></MainLayout>} />
+      <Route path="/menu" element={<MainLayout isAdmin={isAdminLoggedIn} isLoggedIn={isUserLoggedIn}><MenuPage /></MainLayout>} />
+      <Route path="/campaigns" element={<MainLayout isAdmin={isAdminLoggedIn} isLoggedIn={isUserLoggedIn}><CampaignsPage /></MainLayout>} />
+      <Route path="/profile" element={<MainLayout isAdmin={isAdminLoggedIn} isLoggedIn={isUserLoggedIn}><ProfilePage initialTab={profileInitialTab} onLoginSuccess={() => setIsUserLoggedIn(true)} /></MainLayout>} />
+      <Route path="/contact" element={<MainLayout isAdmin={isAdminLoggedIn} isLoggedIn={isUserLoggedIn}><ContactPage /></MainLayout>} />
       
       {/* Auth Routes */}
       <Route path="/forgot-password" element={<ForgotPasswordPage />} />

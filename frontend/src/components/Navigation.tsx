@@ -7,6 +7,7 @@ interface NavigationProps {
   onNavigate: (page: 'home' | 'menu' | 'campaigns' | 'profile' | 'contact') => void;
   onAdminClick: () => void;
   isAdmin?: boolean;
+  isLoggedIn?: boolean;
 }
 
 export function Navigation({
@@ -14,6 +15,7 @@ export function Navigation({
   onNavigate,
   onAdminClick,
   isAdmin = false,
+  isLoggedIn = false,
 }: NavigationProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -22,7 +24,7 @@ export function Navigation({
     { id: 'menu' as const, label: 'Menü' },
     { id: 'campaigns' as const, label: 'Kampanyalar' },
     { id: 'contact' as const, label: 'Konum' },
-    { id: 'profile' as const, label: 'Hesabım' },
+    { id: 'profile' as const, label: isLoggedIn ? 'Hesabım' : 'Giriş / Kayıt Ol' },
   ];
 
   return (

@@ -25,6 +25,7 @@ const AUTH_API_URL = `${API_URL}/auth`;
 
 interface ProfilePageProps {
   initialTab?: 'login' | 'register';
+  onLoginSuccess?: () => void;
 }
 
 interface Coupon {
@@ -37,7 +38,7 @@ interface Coupon {
   validSizes?: string[];
 }
 
-export function ProfilePage({ initialTab = 'login' }: ProfilePageProps) {
+export function ProfilePage({ initialTab = 'login', onLoginSuccess }: ProfilePageProps) {
   const navigate = useNavigate();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
@@ -154,6 +155,7 @@ export function ProfilePage({ initialTab = 'login' }: ProfilePageProps) {
           sadakat_no: data.user.sadakat_no
         });
         setIsLoggedIn(true);
+        onLoginSuccess?.(); // Notify parent component
       } else {
         toast.error(`Giriş Başarısız: ${data.message}`);
       }
@@ -194,6 +196,7 @@ export function ProfilePage({ initialTab = 'login' }: ProfilePageProps) {
           sadakat_no: data.user.sadakat_no || ''
         });
         setIsLoggedIn(true);
+        onLoginSuccess?.(); // Notify parent component
       } else {
         toast.error(`Hata: ${data.message}`);
       }
@@ -210,7 +213,7 @@ export function ProfilePage({ initialTab = 'login' }: ProfilePageProps) {
     setIsLoggedIn(false);
     setUserInfo({ name: '', email: '', phone: '', points: 0, sadakat_no: '' });
     setAuthView('tabs');
-    navigate('/'); // Navigate to home instead of reload
+    window.location.href = '/'; // Force page reload to update navigation
   };
 
   // --- ŞİFRE UNUTTUM (ADIM 1) ---
