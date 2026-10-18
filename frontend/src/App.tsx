@@ -11,7 +11,7 @@ import { AdminLoginPage } from './components/AdminLoginPage';
 import { ForgotPasswordPage } from './components/ForgotPasswordPage';
 import { ResetPasswordPage } from './components/ResetPasswordPage';
 import { VerifyEmailPage } from './components/VerifyEmailPage';
-import { API_URL } from './config';
+import { API_URL, DEMO_MODE } from './config';
 import { Toaster } from 'sonner';
 
 function MainLayout({ children, isAdmin, isLoggedIn }: { children: React.ReactNode; isAdmin: boolean; isLoggedIn: boolean }) {
@@ -56,7 +56,8 @@ export default function App() {
     const checkAuth = async () => {
       const token = localStorage.getItem('token') || sessionStorage.getItem('token');
 
-      if (!token) {
+      // Demo sürümünde backend yok: oturum kontrolü yapılmaz
+      if (!token || DEMO_MODE) {
         setIsLoading(false);
         return;
       }

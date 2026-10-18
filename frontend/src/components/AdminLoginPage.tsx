@@ -4,7 +4,8 @@ import { Label } from './ui/label';
 import { Button } from './ui/button';
 import { Lock, Mail, Shield, ArrowLeft } from 'lucide-react';
 
-import { API_URL } from '../config';
+import { API_URL, DEMO_MODE } from '../config';
+import { DemoNotice } from './DemoNotice';
 
 interface AdminLoginPageProps {
   onLogin: () => void;
@@ -84,6 +85,7 @@ export function AdminLoginPage({ onLogin, onBack }: AdminLoginPageProps) {
         </div>
 
         <div className="bg-white/10 backdrop-blur-lg border border-white/20 p-8 rounded-3xl shadow-2xl">
+          <DemoNotice tone="dark" className="mb-6" />
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-2">
               <Label htmlFor="admin-email" className="text-white">E-posta Adresi</Label>
@@ -135,7 +137,7 @@ export function AdminLoginPage({ onLogin, onBack }: AdminLoginPageProps) {
 
             <Button 
               type="submit" 
-              disabled={isLoading}
+              disabled={isLoading || DEMO_MODE}
               className="w-full bg-gradient-to-r from-[#8B5E3C] to-[#C8A27A] hover:from-[#C8A27A] hover:to-[#8B5E3C] text-white border-0 rounded-full shadow-lg text-base py-6"
             >
               <Shield className="w-5 h-5 mr-2" />

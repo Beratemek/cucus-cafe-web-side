@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { API_URL } from '../config';
+import { API_URL, DEMO_MODE, DEMO_NOTICE } from '../config';
 import { Button } from './ui/button';
 import { CheckCircle, XCircle, Loader2 } from 'lucide-react';
 
@@ -20,6 +20,12 @@ export function VerifyEmailPage() {
         return;
       }
 
+      if (DEMO_MODE) {
+        setStatus('error');
+        setMessage(DEMO_NOTICE);
+        return;
+      }
+
       if (verificationAttempted.current) return;
       verificationAttempted.current = true;
 
@@ -35,7 +41,7 @@ export function VerifyEmailPage() {
         if (response.ok) {
           setStatus('success');
           setMessage(data.message);
-          setTimeout(() => navigate('/login'), 5000); // 5 saniye sonra login'e yönlendir
+          setTimeout(() => navigate('/profile'), 5000); // 5 saniye sonra login'e yönlendir
         } else {
           setStatus('error');
           setMessage(data.message);
@@ -66,7 +72,7 @@ export function VerifyEmailPage() {
             <h2 className="text-2xl font-bold text-[#2D1B12] mb-2">Başarılı!</h2>
             <p className="text-gray-600 mb-6">{message}</p>
             <p className="text-sm text-[#8B5E3C] mb-6">5 saniye içinde giriş sayfasına yönlendirileceksiniz...</p>
-            <Button onClick={() => navigate('/login')} className="bg-[#8B5E3C] hover:bg-[#2D1B12] text-white rounded-xl">
+            <Button onClick={() => navigate('/profile')} className="bg-[#8B5E3C] hover:bg-[#2D1B12] text-white rounded-xl">
               Giriş Yap
             </Button>
           </div>

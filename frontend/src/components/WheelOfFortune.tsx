@@ -9,7 +9,7 @@ import { Button } from "./ui/button";
 import { motion, AnimatePresence } from "motion/react";
 import { useState, useEffect } from "react";
 import { Loader2 } from "lucide-react";
-import { API_URL } from "../config";
+import { API_URL, DEMO_MODE, DEMO_NOTICE } from "../config";
 
 interface WheelOfFortuneProps {
   isOpen: boolean;
@@ -45,6 +45,12 @@ export function WheelOfFortune({ isOpen, onOpenChange }: WheelOfFortuneProps) {
   }, [isOpen]);
 
   const handleSpin = async () => {
+    // Demo sürümünde çark backend'e bağlı olduğu için kapalı
+    if (DEMO_MODE) {
+      setErrorMessage(DEMO_NOTICE);
+      return;
+    }
+
     const token = localStorage.getItem('token') || sessionStorage.getItem('token');
     if (!token) {
       alert("Çarkı çevirmek için lütfen giriş yapınız!");

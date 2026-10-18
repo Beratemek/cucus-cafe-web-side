@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
-import { API_URL } from '../config';
+import { API_URL, DEMO_MODE } from '../config';
+import { DemoNotice } from './DemoNotice';
 import { ArrowLeft, Mail } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
@@ -60,7 +61,7 @@ export function ForgotPasswordPage() {
     <div className="min-h-screen bg-[#FDFBF7] flex flex-col items-center justify-center p-4">
       <Button 
         variant="ghost" 
-        onClick={() => navigate('/login')}
+        onClick={() => navigate('/profile')}
         className="absolute top-4 left-4 text-[#8B5E3C] hover:bg-[#E6D3BA]/20"
       >
         <ArrowLeft className="w-5 h-5 mr-2" />
@@ -75,6 +76,8 @@ export function ForgotPasswordPage() {
           <h1 className="text-2xl font-bold text-[#2D1B12] mb-2">Şifremi Unuttum</h1>
           <p className="text-[#8B5E3C]">Lütfen e-posta adresinizi girin. Size şifre sıfırlama linki göndereceğiz.</p>
         </div>
+
+        <DemoNotice className="mb-6" />
 
         {message && (
           <div className={`p-4 rounded-xl mb-6 text-sm ${
@@ -99,7 +102,7 @@ export function ForgotPasswordPage() {
 
           <Button 
             type="submit" 
-            disabled={isLoading}
+            disabled={isLoading || DEMO_MODE}
             className="w-full h-12 bg-[#8B5E3C] hover:bg-[#2D1B12] text-white rounded-xl text-base font-medium transition-colors"
           >
             {isLoading ? 'Gönderiliyor...' : 'Sıfırlama Linki Gönder'}

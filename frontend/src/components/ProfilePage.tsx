@@ -18,7 +18,8 @@ import {
 } from "./ui/dialog";
 import { toast } from "sonner";
 
-import { API_URL } from '../config';
+import { API_URL, DEMO_MODE, DEMO_NOTICE } from '../config';
+import { DemoNotice } from './DemoNotice';
 
 // Backend API Adresi
 const AUTH_API_URL = `${API_URL}/auth`;
@@ -79,7 +80,7 @@ export function ProfilePage({ initialTab = 'login', onLoginSuccess }: ProfilePag
   useEffect(() => {
     window.scrollTo(0, 0);
     const token = localStorage.getItem('token') || sessionStorage.getItem('token');
-    if (token) {
+    if (token && !DEMO_MODE) {
       fetchUser(token);
     }
   }, []);
@@ -126,6 +127,7 @@ export function ProfilePage({ initialTab = 'login', onLoginSuccess }: ProfilePag
   // --- LOGIN ---
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (DEMO_MODE) { toast.info(DEMO_NOTICE); return; }
     try {
       const response = await fetch(`${AUTH_API_URL}/login`, {
         method: 'POST',
@@ -168,6 +170,7 @@ export function ProfilePage({ initialTab = 'login', onLoginSuccess }: ProfilePag
   // --- REGISTER ---
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (DEMO_MODE) { toast.info(DEMO_NOTICE); return; }
     const nameParts = registerName.trim().split(' ');
     const surname = nameParts.length > 1 ? nameParts.pop() : '';
     const name = nameParts.join(' ');
@@ -213,12 +216,13 @@ export function ProfilePage({ initialTab = 'login', onLoginSuccess }: ProfilePag
     setIsLoggedIn(false);
     setUserInfo({ name: '', email: '', phone: '', points: 0, sadakat_no: '' });
     setAuthView('tabs');
-    window.location.href = '/'; // Force page reload to update navigation
+    window.location.href = import.meta.env.BASE_URL; // Force page reload to update navigation
   };
 
   // --- ŞİFRE UNUTTUM (ADIM 1) ---
   const handleForgotPassword = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (DEMO_MODE) { toast.info(DEMO_NOTICE); return; }
     if (!forgotEmail) {
       toast.warning("Lütfen e-posta adresinizi girin.");
       return;
@@ -263,6 +267,7 @@ export function ProfilePage({ initialTab = 'login', onLoginSuccess }: ProfilePag
   // --- ŞİFRE SIFIRLAMA (ADIM 2) ---
   const handleResetPassword = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (DEMO_MODE) { toast.info(DEMO_NOTICE); return; }
     if (!newPassword) { toast.warning("Lütfen yeni şifre girin."); return; }
 
     try {
@@ -459,6 +464,7 @@ export function ProfilePage({ initialTab = 'login', onLoginSuccess }: ProfilePag
           // --- GİRİŞ / KAYIT / ŞİFRE SIFIRLAMA EKRANLARI ---
           <div className="grid lg:grid-cols-2 gap-12">
             <div className="max-w-md mx-auto lg:mx-0 w-full">
+              <DemoNotice className="mb-6" />
 
               {/* DURUM 1: LOGIN VEYA REGISTER */}
               {authView === 'tabs' && (

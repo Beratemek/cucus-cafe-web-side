@@ -1,6 +1,7 @@
 import { Badge } from './ui/badge';
 import { Clock, Percent, Gift, Calendar, Sparkles, Zap, Coffee } from 'lucide-react';
-import { API_URL } from '../config';
+import { API_URL, DEMO_MODE } from '../config';
+import { DemoNotice } from './DemoNotice';
 // Eğer 'motion/react' hata vermeye devam ederse burayı 'framer-motion' olarak değiştirmeyi dene
 import { motion } from 'motion/react';
 import { useEffect, useState } from 'react';
@@ -19,12 +20,12 @@ interface CampaignData {
 
 export function CampaignsPage() {
   const [campaigns, setCampaigns] = useState<CampaignData[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(!DEMO_MODE);
 
-  // Sayfa yüklendiğinde verileri çek
+  // Sayfa yüklendiğinde verileri çek (demo sürümünde backend yok)
   useEffect(() => {
     window.scrollTo(0, 0);
-    fetchCampaigns();
+    if (!DEMO_MODE) fetchCampaigns();
   }, []);
 
   const fetchCampaigns = async () => {
@@ -32,7 +33,7 @@ export function CampaignsPage() {
       const response = await fetch(`${API_URL}/campaigns?active=true`);
       const data = await response.json();
       if (response.ok) {
-        setCampaigns(data.campaigns);
+        setCampaigns(data.campaigns || []);
       }
     } catch (error) {
       console.error("Kampanyalar yüklenirken hata:", error);
@@ -75,6 +76,11 @@ export function CampaignsPage() {
 
         {loading ? (
           <div className="text-center text-[#8B5E3C]">Yükleniyor...</div>
+        ) : DEMO_MODE ? (
+          <DemoNotice
+            className="max-w-2xl mx-auto mb-12"
+            message="Bu, sitenin demo sürümü. Kampanyalar yönetim panelinden girildiği için burada listelenmiyor; kampanya kuralları aşağıda."
+          />
         ) : campaigns.length === 0 ? (
           <div className="text-center text-[#8B5E3C]">Aktif kampanya bulunamadı.</div>
         ) : (

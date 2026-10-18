@@ -2,8 +2,10 @@ import { ImageWithFallback } from './figma/ImageWithFallback';
 import { motion } from 'motion/react';
 import { Coffee, Cake, Sparkles, Flame, Snowflake, Wine, IceCream, UtensilsCrossed, Apple, GlassWater } from 'lucide-react';
 import { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 
-import { API_URL } from '../config';
+import { API_URL, DEMO_MODE } from '../config';
+import { getMenuProducts } from '../data/products';
 // Sayfa Importları
 import { CakesAndDessertsPage } from './CakesAndDessertsPage';
 import { StandardCoffeesPage } from './StandardCoffeesPage';
@@ -29,17 +31,24 @@ interface Product {
 }
 
 export function MenuPage() {
-  const [activePage, setActivePage] = useState<string | null>(null);
-  const [products, setProducts] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(true);
+  // Açık kategori adres çubuğunda tutulur (?kategori=cakes): link paylaşılabilir, geri tuşu çalışır
+  const [searchParams, setSearchParams] = useSearchParams();
+  const activePage = searchParams.get('kategori');
+  const setActivePage = (id: string | null) => setSearchParams(id ? { kategori: id } : {});
+
+  // Demo sürümünde menü doğrudan statik veriden gelir
+  const [products, setProducts] = useState<Product[]>(() => (DEMO_MODE ? getMenuProducts() : []));
+  const [loading, setLoading] = useState(!DEMO_MODE);
 
   useEffect(() => {
     window.scrollTo(0, 0);
+    if (DEMO_MODE) return;
 
     const fetchProducts = async () => {
       try {
         // DÜZELTME: Senin backend kodunda port 4000 olduğu için burayı 4000 yaptım.
-        const response = await fetch(`${API_URL}/products`); 
+        const response = await fetch(`${API_URL}/products`);
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
         const data = await response.json();
         
         const rawList = data.products || []; 
@@ -68,10 +77,12 @@ export function MenuPage() {
           };
         });
 
-        setProducts(formattedList);
+        // Backend boş liste dönerse statik menüyü göster
+        setProducts(formattedList.length > 0 ? formattedList : getMenuProducts());
         setLoading(false);
       } catch (error) {
-        console.error("Veri çekilemedi:", error);
+        console.error("Veri çekilemedi, statik menü gösteriliyor:", error);
+        setProducts(getMenuProducts());
         setLoading(false);
       }
     };

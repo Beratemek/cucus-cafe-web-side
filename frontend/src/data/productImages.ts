@@ -1,13 +1,13 @@
 // Her ürün için Figma AI uyumlu, %100 çalışan görseller (Imgur + Unsplash) [ULTRA HD 1920px]
 export const productImages: Record<string, string> = {
   // --- ☕ STANDART KAHVELER (1-20) ---
-  '1': 'https://images.unsplash.com/photo-1565553018826-6218d9cb62d2?q=80&w=1920&auto=format&fit=crop', // Türk Kahvesi
-  '2': 'https://images.unsplash.com/photo-1698863642738-9588d3d92257?q=80&w=1920&auto=format&fit=crop', // Dibek Kahvesi
-  '3': 'https://images.unsplash.com/photo-1680196728442-83563914979e?q=80&w=1920&auto=format&fit=crop', // Menengiç Kahvesi
+  '1': 'https://images.unsplash.com/photo-1494314671902-399b18174975?q=80&w=1920&auto=format&fit=crop', // Türk Kahvesi
+  '2': 'https://images.unsplash.com/photo-1511920170033-f8396924c348?q=80&w=1920&auto=format&fit=crop', // Dibek Kahvesi
+  '3': 'https://images.unsplash.com/photo-1534778101976-62847782c213?q=80&w=1920&auto=format&fit=crop', // Menengiç Kahvesi
   '4': 'https://images.unsplash.com/photo-1510591509098-f4fdc6d0ff04?q=80&w=1920&auto=format&fit=crop', // Espresso
-  '5': 'https://images.unsplash.com/photo-1453230806017-56d36353e6c0?q=80&w=1920&auto=format&fit=crop', // Doppio Espresso
-  '6': 'https://images.unsplash.com/photo-1485808191679-5f8c7c8f3194?q=80&w=1920&auto=format&fit=crop', // Espresso Macchiato
-  '7': 'https://images.unsplash.com/photo-1551030173-122f528335c1?q=80&w=1920&auto=format&fit=crop', // Americano
+  '5': 'https://images.unsplash.com/photo-1610889556528-9a770e32642f?q=80&w=1920&auto=format&fit=crop', // Doppio Espresso
+  '6': 'https://images.unsplash.com/photo-1559496417-e7f25cb247f3?q=80&w=1920&auto=format&fit=crop', // Espresso Macchiato
+  '7': 'https://images.unsplash.com/photo-1442512595331-e89e73853f31?q=80&w=1920&auto=format&fit=crop', // Americano
   '8': 'https://images.unsplash.com/photo-1497935586351-b67a49e012bf?q=80&w=1920&auto=format&fit=crop', // Filtre Kahve
   '9': 'https://images.unsplash.com/photo-1570968915860-54d5c301fa9f?q=80&w=1920&auto=format&fit=crop', // Cafe Latte
   '10': 'https://images.unsplash.com/photo-1572442388796-11668a67e53d?q=80&w=1920&auto=format&fit=crop', // Cappuccino
@@ -16,7 +16,7 @@ export const productImages: Record<string, string> = {
   '13': 'https://images.unsplash.com/photo-1578314675249-a6910f80cc4e?q=80&w=1920&auto=format&fit=crop', // Mocha
   '14': 'https://i.imgur.com/LxrFiefh.jpg', // White Mocha [YÜKSEK KALİTE]
   '15': 'https://i.imgur.com/Vfq6w9kh.jpg', // Caramel Macchiato [YÜKSEK KALİTE]
-  '16': 'https://images.unsplash.com/photo-1521495914603-519db1d04423?q=80&w=1920&auto=format&fit=crop', // Creme Brulee Cafe Latte
+  '16': 'https://images.unsplash.com/photo-1541167760496-1628856ab772?q=80&w=1920&auto=format&fit=crop', // Creme Brulee Cafe Latte
   '17': 'https://i.imgur.com/m2W5V8fh.jpg', // Lotuslu Cafe Latte [YÜKSEK KALİTE]
   '18': 'https://images.unsplash.com/photo-1509042239860-f550ce710b93?q=80&w=1920&auto=format&fit=crop', // Pumpkin Cafe Latte
   '19': 'https://i.imgur.com/yGZcg2eh.jpg', // Caramel Cafe Latte [YÜKSEK KALİTE]
@@ -28,9 +28,9 @@ export const productImages: Record<string, string> = {
   '23': 'https://i.imgur.com/jWPFJ7fh.jpg', // Raspberry Mocha [YÜKSEK KALİTE]
   '24': 'https://i.imgur.com/0IU0bKjh.jpg', // Zebra Mocha [YÜKSEK KALİTE]
   '25': 'https://i.imgur.com/NNQwV6wh.jpg', // Nutella Latte [YÜKSEK KALİTE]
-  '26': 'https://images.unsplash.com/photo-1515442261630-167f94829132?q=80&w=1920&auto=format&fit=crop', // Sifa Latte
+  '26': 'https://images.unsplash.com/photo-1534778101976-62847782c213?q=80&w=1920&auto=format&fit=crop', // Sifa Latte
   '27': 'https://images.unsplash.com/photo-1638543284847-3a6bed3e1689?q=80&w=1920&auto=format&fit=crop', // Affogato [GENİŞ AÇI]
-  '28': 'https://images.unsplash.com/photo-1626127117178-57a62fb08db5?q=80&w=1920&auto=format&fit=crop', // Watermelon White Mocha
+  '28': 'https://images.unsplash.com/photo-1517701604599-bb29b565090c?q=80&w=1920&auto=format&fit=crop', // Watermelon White Mocha
   '29': 'https://images.unsplash.com/photo-1515825838458-f2a94b20105a?q=80&w=1920&auto=format&fit=crop', // Matcha Latte
 
   // --- 🍰 PASTA & TATLILAR (30-49) ---
@@ -39,17 +39,17 @@ export const productImages: Record<string, string> = {
   '32': 'https://i.imgur.com/NtSyobDh.jpg', // Bitter Çikolatalı San Sebastian [YÜKSEK KALİTE]
   '33': 'https://i.imgur.com/VukSCTNh.jpg', // Antep Fıstıklı San Sebastian (Urfadan) [YÜKSEK KALİTE]
   '34': 'https://i.imgur.com/BLC6Bx4h.jpg', // Lotuslu San Sebastian (Bir Ilık) [YÜKSEK KALİTE]
-  '35': 'https://images.unsplash.com/photo-1629126428312-d9c0f9da7663?q=80&w=1920&auto=format&fit=crop', // Cream Puff
+  '35': 'https://images.unsplash.com/photo-1488477181946-6428a0291777?q=80&w=1920&auto=format&fit=crop', // Cream Puff
   '36': 'https://images.unsplash.com/photo-1654922042177-d348ae5a0484?q=80&w=1920&auto=format&fit=crop', // Dubai Cream Puff [GENİŞ AÇI]
   '37': 'https://images.unsplash.com/photo-1558961363-fa8fdf82db35?q=80&w=1920&auto=format&fit=crop', // Frambuazlı Cookie
-  '38': 'https://images.unsplash.com/photo-1499636138143-bd649043ea52?q=80&w=1920&auto=format&fit=crop', // Çikolatalı Cookie
+  '38': 'https://images.unsplash.com/photo-1499636136210-6f4ee915583e?q=80&w=1920&auto=format&fit=crop', // Çikolatalı Cookie
   '39': 'https://images.unsplash.com/photo-1558303420-f814d8a590f5?q=80&w=1920&auto=format&fit=crop', // Muffin
   '40': 'https://images.unsplash.com/photo-1534353473418-4cfa6c56fd38?q=80&w=1920&auto=format&fit=crop', // Limonlu Cheesecake
   '41': 'https://images.unsplash.com/photo-1565557623262-b51c2513a641?q=80&w=1920&auto=format&fit=crop', // Çikolatalı Cheesecake
   '42': 'https://i.imgur.com/u5d2vSGh.jpg', // Krem Sokola Beyaz Çikolatalı [YÜKSEK KALİTE]
   '43': 'https://images.unsplash.com/photo-1712262582533-dcf8deba14a3?q=80&w=1920&auto=format&fit=crop', // Tiramisu [GENİŞ AÇI]
   '44': 'https://i.imgur.com/nsvg304h.jpg', // Havuçlu Cevizli Kek [YÜKSEK KALİTE]
-  '45': 'https://images.unsplash.com/photo-1599706312488-66df759d57d0?q=80&w=1920&auto=format&fit=crop', // Cookielı Browni
+  '45': 'https://images.unsplash.com/photo-1606313564200-e75d5e30476c?q=80&w=1920&auto=format&fit=crop', // Cookielı Browni
   '46': 'https://i.imgur.com/dyonsbfh.jpg', // Krem Sokola [YÜKSEK KALİTE]
   '47': 'https://i.imgur.com/6EBfdkPh.jpg', // Shoot!? Tiramisu [YÜKSEK KALİTE]
   '48': 'https://images.unsplash.com/photo-1576618148400-f54bed99fcfd?q=80&w=1920&auto=format&fit=crop', // Kleopatra Tabağı
@@ -92,7 +92,7 @@ export const productImages: Record<string, string> = {
   // --- ❄️ FROZEN (78-84) ---
   '78': 'https://images.unsplash.com/photo-1744209375191-889d9fdef3f7?q=80&w=1920&auto=format&fit=crop', // SkyWish [GENİŞ AÇI]
   '79': 'https://images.unsplash.com/photo-1513558161293-cdaf765ed2fd?q=80&w=1920&auto=format&fit=crop', // Lime & Lemon Frozen
-  '80': 'https://images.unsplash.com/photo-1516627145497-ae693635079a?q=80&w=1920&auto=format&fit=crop', // Lemonade & Strawberry Frozen
+  '80': 'https://images.unsplash.com/photo-1497534446932-c925b458314e?q=80&w=1920&auto=format&fit=crop', // Lemonade & Strawberry Frozen
   '81': 'https://images.unsplash.com/photo-1623065422902-30a2d299bbe4?q=80&w=1920&auto=format&fit=crop', // Strawberry Frozen
   '82': 'https://images.unsplash.com/photo-1635973895759-1225819a1b5b?q=80&w=1920&auto=format&fit=crop', // Red Forest Fruit Frozen [GENİŞ AÇI]
   '83': 'https://images.unsplash.com/photo-1613478223719-2ab802602423?q=80&w=1920&auto=format&fit=crop', // Apple Frozen
@@ -102,7 +102,7 @@ export const productImages: Record<string, string> = {
   '85': 'https://images.unsplash.com/photo-1579954115567-dff2eeb6fdeb?q=80&w=1920&auto=format&fit=crop', // Chocolate Milkshake
   '86': 'https://images.unsplash.com/photo-1579954115545-a95591f28bfc?q=80&w=1920&auto=format&fit=crop', // Vanilla Milkshake
   '87': 'https://images.unsplash.com/photo-1579954115545-a95591f28bfc?q=80&w=1920&auto=format&fit=crop', // Strawberry Milkshake
-  '88': 'https://images.unsplash.com/photo-1594488518881-2cb2c040d718?q=80&w=1920&auto=format&fit=crop', // Banana Milkshake
+  '88': 'https://images.unsplash.com/photo-1505252585461-04db1eb84625?q=80&w=1920&auto=format&fit=crop', // Banana Milkshake
   '89': 'https://images.unsplash.com/photo-1623728720458-8c2f5a9dc13c?q=80&w=1920&auto=format&fit=crop', // Biscuit Milkshake [GENİŞ AÇI]
   '90': 'https://i.imgur.com/dmrefMbh.jpg', // Protein Milkshake [YÜKSEK KALİTE]
 

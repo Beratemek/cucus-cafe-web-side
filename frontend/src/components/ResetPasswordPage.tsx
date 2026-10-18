@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
-import { API_URL } from '../config';
+import { API_URL, DEMO_MODE } from '../config';
+import { DemoNotice } from './DemoNotice';
 import { ArrowLeft, Lock, Eye, EyeOff } from 'lucide-react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 
@@ -42,7 +43,7 @@ export function ResetPasswordPage() {
 
       if (response.ok) {
         setMessage({ type: 'success', text: data.message });
-        setTimeout(() => navigate('/login'), 3000);
+        setTimeout(() => navigate('/profile'), 3000);
       } else {
         setMessage({ type: 'error', text: data.message });
       }
@@ -75,6 +76,8 @@ export function ResetPasswordPage() {
           <h1 className="text-2xl font-bold text-[#2D1B12] mb-2">Yeni Şifre Belirle</h1>
           <p className="text-[#8B5E3C]">Lütfen hesabınız için yeni bir şifre belirleyin.</p>
         </div>
+
+        <DemoNotice className="mb-6" />
 
         {message && (
           <div className={`p-4 rounded-xl mb-6 text-sm ${
@@ -121,7 +124,7 @@ export function ResetPasswordPage() {
 
           <Button 
             type="submit" 
-            disabled={isLoading}
+            disabled={isLoading || DEMO_MODE}
             className="w-full h-12 bg-[#8B5E3C] hover:bg-[#2D1B12] text-white rounded-xl text-base font-medium transition-colors"
           >
             {isLoading ? 'Güncelleniyor...' : 'Şifreyi Güncelle'}

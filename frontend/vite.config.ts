@@ -4,6 +4,8 @@
   import path from 'path';
 
   export default defineConfig({
+    // GitHub Pages derlemesinde alt dizin (BASE_PATH=/cucus-cafe-web-side/), yerelde kök
+    base: process.env.BASE_PATH || '/',
     plugins: [react()],
     resolve: {
       extensions: ['.js', '.jsx', '.ts', '.tsx', '.json'],

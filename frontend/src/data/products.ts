@@ -187,3 +187,15 @@ export const getFeaturedProducts = () => {
     image: productImages[product.id] || 'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxjb2ZmZWUlMjBjdXAlMjBtaW5pbWFsfGVufDF8fHx8MTc2MDUyNTM2Nnww&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral'
   }));
 };
+
+// Menü sayfası için statik liste (backend'e ulaşılamadığında ve demo sürümünde kullanılır)
+export const getMenuProducts = () =>
+  allProducts.map(product => ({
+    id: Number(product.id),
+    name: product.name,
+    description: product.description,
+    price: product.sizes.map(s => `${s.size}: ${s.price}₺`).join(' | '),
+    image: productImages[product.id] || '',
+    popular: product.tag === 'Popüler',
+    category: product.category,
+  }));
